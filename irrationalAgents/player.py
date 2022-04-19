@@ -10,6 +10,9 @@ class Player:
         as Blue.
         """
         # put your code here
+        self.boardSize = n
+        self.player = player
+
 
     def action(self):
         """
@@ -17,6 +20,19 @@ class Player:
         of the game, select an action to play.
         """
         # put your code here
+
+        move = input("Enter a move type - 'steal' or 'place' followed by a (r,q) tuple: ")
+        move = move.split(" ")
+        print(move)
+        if (move[0] == "steal"):
+            return ("STEAL", )
+        elif (move[0] == "place"):
+            coords = move[1]
+            r = int(coords[1])
+            q = int(coords[3])
+            return ("PLACE", r, q)
+        
+
     
     def turn(self, player, action):
         """
