@@ -21,15 +21,12 @@ class Player:
         """
         # put your code here
 
-        move = input("Enter a move type - 'steal' or 'place' followed by a (r,q) tuple: ")
-        move = move.split(" ")
-        print(move)
-        if (move[0] == "steal"):
+        move = input("Enter a move type - 'steal' or an (r,q) tuple to place: ")
+        if (move == "steal"):
             return ("STEAL", )
-        elif (move[0] == "place"):
-            coords = move[1]
-            r = int(coords[1])
-            q = int(coords[3])
+        else:
+            r = int(move[0])
+            q = int(move[2])
             return ("PLACE", r, q)
         
 
