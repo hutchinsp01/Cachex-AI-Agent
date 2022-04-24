@@ -1,6 +1,4 @@
-
-from tkinter import N
-
+from irrationalAgents.basicBoard import Board
 
 class Player:
     def __init__(self, player, n):
@@ -12,8 +10,8 @@ class Player:
         play as Red, or the string "blue" if your player will play
         as Blue.
         """
-        self.boardSize = n
         self.player = player
+        self.board = Board(n)
 
 
     def action(self):
@@ -21,7 +19,14 @@ class Player:
         Called at the beginning of your turn. Based on the current state
         of the game, select an action to play.
         """
-        # put your code here
+        i = j = 0
+        for row in self.board._data:
+            j = 0
+            for tile in row:
+                if tile == 0:
+                    return ("PLACE", i, j)
+                j += 1
+            i += 1
 
 
     
@@ -36,5 +41,14 @@ class Player:
         the same as what your player returned from the action method
         above. However, the referee has validated it at this point.
         """
-        # put your code here
+
+        actionType, *args = action
+        if actionType == "STEAL":
+            # Apply STEAL action
+            self.board.swap()
+
+        elif actionType == "PLACE":
+
+            coord = tuple(args)
+            self.board.place(player, coord)
 
