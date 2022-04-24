@@ -19,14 +19,16 @@ class Player:
         Called at the beginning of your turn. Based on the current state
         of the game, select an action to play.
         """
-        i = j = 0
-        for row in self.board._data:
-            j = 0
-            for tile in row:
-                if tile == 0:
-                    return ("PLACE", i, j)
-                j += 1
-            i += 1
+
+        for i in range (0,self.board.n):
+            for j in range(0, self.board.n):
+                if self.player == "blue":
+                    if self.board._data[i][j] == 0:
+                        return ("PLACE", i, j)
+                
+                if self.player == "red":
+                    if self.board._data[j][i] == 0:
+                        return ("PLACE", j, i)
 
 
     
