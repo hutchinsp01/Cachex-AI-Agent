@@ -157,3 +157,17 @@ class Board:
         """
         return [_ADD(coord, step) for step in _HEX_STEPS \
             if self.inside_bounds(_ADD(coord, step))]
+
+    def handle_action(self, action, player):
+        actionType, *args = action
+        if actionType == "STEAL":
+            # Apply STEAL action
+            self.swap()
+
+        elif actionType == "PLACE":
+
+            coord = tuple(args)
+            self.place(player, coord)
+
+    def revert_state(self, _data):
+        self._data = _data
