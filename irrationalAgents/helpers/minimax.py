@@ -1,11 +1,12 @@
 from numpy import Infinity
-from irrationalAgents.constants import MAX_DEPTH, OURAGENT, OPPONENT
+from irrationalAgents.basicBoard import _SWAP_PLAYER
+from irrationalAgents.constants import MAX_DEPTH
 
 
-def minimax(state, depth, player):
+def minimax(state, depth, curPlayer, ourPlayer):
 
     # [best row, best col, best score]
-    if player == OURAGENT:
+    if curPlayer == ourPlayer:
         best = [-1, -1, -Infinity]
     else:
         best = [-1, -1, +Infinity]
@@ -21,12 +22,12 @@ def minimax(state, depth, player):
 
     for hex in empty_hexes(state):
         x, y = hex[0], hex[1] 
-        state._data[x][y] = player
-        score = minimax(state, depth + 1, -player)
+        state._data[x][y] = curPlayer
+        score = minimax(state, depth + 1, _SWAP_PLAYER[curPlayer], ourPlayer)
         state._data[x][y] = 0
         score[0], score[1] = x, y 
 
-        if player == OURAGENT:
+        if curPlayer == ourPlayer:
             if score[2] > best[2]:
                 best = score
         else:

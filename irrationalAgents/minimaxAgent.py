@@ -1,6 +1,5 @@
 from irrationalAgents.helpers.minimax import minimax
-from irrationalAgents.basicBoard import Board
-from irrationalAgents.constants import OURAGENT
+from irrationalAgents.basicBoard import _TOKEN_MAP_IN, Board
 
 class Player:
     def __init__(self, player, n):
@@ -21,7 +20,7 @@ class Player:
         Called at the beginning of your turn. Based on the current state
         of the game, select an action to play.
         """
-        position = minimax(self.board, 0, OURAGENT)
+        position = minimax(self.board, 0, _TOKEN_MAP_IN[self.player], _TOKEN_MAP_IN[self.player])
         return ("PLACE", position[0], position[1]) 
 
 
