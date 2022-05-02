@@ -7,9 +7,6 @@ import copy
 
 def minimax(state, depth, action, curPlayer, ourPlayer):
 
-    if action != None:
-        state.handle_action(action, _TOKEN_MAP_OUT[curPlayer])
-
     # [best row, best col, best score]
     if curPlayer == ourPlayer:
         best = [-1, -1, -Infinity]
@@ -28,9 +25,9 @@ def minimax(state, depth, action, curPlayer, ourPlayer):
     for hex in empty_hexes(state):
         x, y = hex[0], hex[1] 
         action = ("PLACE", x, y)
-        saveState = copy.deepcopy(state._data)
+        move = state.handle_action(action, _TOKEN_MAP_OUT[curPlayer])
         score = minimax(state, depth + 1, action, _SWAP_PLAYER[curPlayer], ourPlayer)
-        state.revert_state(saveState)
+        state.undo_move(move)
         score[0], score[1] = x, y 
 
         if curPlayer == ourPlayer:

@@ -22,10 +22,7 @@ class Player:
         Called at the beginning of your turn. Based on the current state
         of the game, select an action to play.
         """
-        board_data = copy.deepcopy(self.board._data)
         position = minimax(self.board, 0, None, self.playerInt, self.playerInt)
-        self.board.revert_state(board_data)
-        print(self.board._data)
         return ("PLACE", position[0], position[1]) 
 
 
