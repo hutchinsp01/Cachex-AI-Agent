@@ -52,7 +52,7 @@ class Board:
 
         # set start and end edges for the colours
         self.blue_start = [(i, 0) for i in range(n)]
-        self.blue_end = [(n - 1, i) for i in range(n)]
+        self.blue_end = [(i, n-1) for i in range(n)]
         self.red_start = [(j, i) for (i, j) in self.blue_start]
         self.red_end = [(j, i) for (i, j) in self.blue_end]
 

@@ -84,17 +84,16 @@ def dijkstraPath(tile: tuple, color: int, board: Board) -> tuple:
         return -1
     
     # perform dijkstra's algo over whole board until the closest destination tile is reached
-    while not queue.empty():
-        print(queue.qsize())
+    while queue.qsize() > 0:
+        print("Queue size: " + str(queue.qsize()))
         tile = queue.get()
         cost = tile.cost
-
-        print(cost)
-        print(tile.coords)
+        
+        print("Expanding: " + str(tile.coords))
        
         # check if we have hit a destination tile
         if tile.coords in destinationEdge:
-
+            print("Hit!")
             # lock in the destination tile, then create a list of the tiles on the path to it
             lockedIn[tile.coords[0]][tile.coords[1]] = True
             path = []
@@ -111,15 +110,15 @@ def dijkstraPath(tile: tuple, color: int, board: Board) -> tuple:
         
         lockedIn[tile.coords[0]][tile.coords[1]] = True
         for neighbour in board._coord_neighbours(tile.coords):
+            print(neighbour)
             (i, j) = neighbour
+
             if board._data[i][j] == color:
                 queue.put(dijkstraTile(neighbour, cost, tile))
             elif board._data[i][j] == 0:
                 queue.put(dijkstraTile(neighbour, cost + 1, tile))
             else:
-                # opposing color occupies start tile; no path possible
-                return (-1, None)
-        break
+                continue
     
     return (-1, None)
 
