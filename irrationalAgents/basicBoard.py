@@ -45,7 +45,7 @@ class Board:
         """
         self.n = n
         
-        if board is not None:
+        if board is None:
             self._data = zeros((n, n), dtype=int)
         else:
             self._data = board

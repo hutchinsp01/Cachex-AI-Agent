@@ -9,6 +9,7 @@ def main():
         with open(sys.argv[1]) as file:
             data = json.load(file)
             board = handle_input(data)
+            print(board._data)
             (cost, path) = getDijkstraDistance(2, board)
             print("Cost = " + str(cost))
             print("Path = ")
@@ -42,7 +43,8 @@ def getDijkstraDistance(color: int, board: Board = None) -> tuple:
     '''
     
     # Set starting edge. We check shortest path from all tiles on this edge to the opposite edge.
-    edge = board.blue_start if color == 2 else board.red_start
+    #edge = board.blue_start if color == 2 else board.red_start
+    edge = [(0,0)]
 
     shortestPaths = [dijkstraPath(tile, color, board) for tile in edge]
     
@@ -51,6 +53,8 @@ def getDijkstraDistance(color: int, board: Board = None) -> tuple:
     min = np.inf
     shortestPath = []
     for (cost, path) in shortestPaths:
+        print(cost)
+        print(path)
         if cost < min:
             min = cost
             shortestPath = path
@@ -114,6 +118,8 @@ def dijkstraPath(tile: tuple, color: int, board: Board) -> tuple:
             (i, j) = neighbour
 
             if board._data[i][j] == color:
+                print("same color")
+                print("putting in with " + str(cost))
                 queue.put(dijkstraTile(neighbour, cost, tile))
             elif board._data[i][j] == 0:
                 queue.put(dijkstraTile(neighbour, cost + 1, tile))
