@@ -2,14 +2,7 @@
 Provide a class to maintain the state of a Cachex game board, including
 some helper methods to assist in updating and searching the board.
 
-NOTE:
-This board representation is designed to be used internally by the referee
-for the purposes of validating actions and displaying the result of the game.
-Each player is expected to store its own internal representation of the board
-for use in informing decisions about which action to choose each turn. Please
-don't assume this class is an "ideal" board representation for your own agent; 
-you should think carefully about how to design your own data structures for 
-representing the state of a game, with respect to your chosen strategy. 
+Code borrowed from 'referee' package written for COMP30024 Project B at The University of Melbourne
 """
 
 from queue import Queue
@@ -46,12 +39,22 @@ _TOKEN_MAP_IN = {v: k for k, v in _TOKEN_MAP_OUT.items()}
 _SWAP_PLAYER = { 0: 0, 1: 2, 2: 1 }
 
 class Board:
-    def __init__(self, n):
+    def __init__(self, n, board = None):
         """
         Initialise board of given size n.
         """
         self.n = n
-        self._data = zeros((n, n), dtype=int)
+        
+        if board is not None:
+            self._data = zeros((n, n), dtype=int)
+        else:
+            self._data = board
+
+        # set start and end edges for the colours
+        self.blue_start = [(i, 0) for i in range(n)]
+        self.blue_end = [(n - 1, i) for i in range(n)]
+        self.red_start = [(j, i) for (i, j) in self.blue_start]
+        self.red_end = [(j, i) for (i, j) in self.blue_end]
 
     def __getitem__(self, coord):
         """
