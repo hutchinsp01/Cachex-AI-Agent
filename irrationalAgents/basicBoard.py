@@ -172,9 +172,6 @@ class Board:
             coord = tuple(args)
             captured = self.place(player, coord)
             return (player, coord, captured)
-    
-    def revert_state(self, _data):
-        self._data = _data
 
     def undo_move(self, move):
         
@@ -185,7 +182,6 @@ class Board:
         
         else:
             self._data[move[1][0], move[1][1]] = 0
-
             opponent = _SWAP_PLAYER[_TOKEN_MAP_IN[move[0]]]
             for captured in move[2]:
                 self._data[captured[0]][captured[1]] = opponent

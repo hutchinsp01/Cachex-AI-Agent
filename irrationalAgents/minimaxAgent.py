@@ -1,3 +1,4 @@
+from numpy import Infinity
 from irrationalAgents.helpers.minimax import minimax
 from irrationalAgents.basicBoard import _TOKEN_MAP_IN, Board
 import copy
@@ -22,7 +23,7 @@ class Player:
         Called at the beginning of your turn. Based on the current state
         of the game, select an action to play.
         """
-        position = minimax(self.board, 0, None, self.playerInt, self.playerInt)
+        position = minimax(self.board, 0, None, -Infinity, +Infinity, self.playerInt, self.playerInt)
         return ("PLACE", position[0], position[1]) 
 
 
