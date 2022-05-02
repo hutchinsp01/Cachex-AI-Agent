@@ -1,5 +1,6 @@
 from irrationalAgents.helpers.minimax import minimax
 from irrationalAgents.basicBoard import _TOKEN_MAP_IN, Board
+import copy
 
 class Player:
     def __init__(self, player, n):
@@ -12,6 +13,7 @@ class Player:
         as Blue.
         """
         self.player = player
+        self.playerInt = _TOKEN_MAP_IN[self.player]
         self.board = Board(n)
 
 
@@ -20,7 +22,10 @@ class Player:
         Called at the beginning of your turn. Based on the current state
         of the game, select an action to play.
         """
-        position = minimax(self.board, 0, _TOKEN_MAP_IN[self.player], _TOKEN_MAP_IN[self.player])
+        board_data = copy.deepcopy(self.board._data)
+        position = minimax(self.board, 0, None, self.playerInt, self.playerInt)
+        self.board.revert_state(board_data)
+        print(self.board._data)
         return ("PLACE", position[0], position[1]) 
 
 
@@ -36,14 +41,6 @@ class Player:
         the same as what your player returned from the action method
         above. However, the referee has validated it at this point.
         """
-        actionType, *args = action
-        if actionType == "STEAL":
-            # Apply STEAL action
-            self.board.swap()
-
-        elif actionType == "PLACE":
-
-            coord = tuple(args)
-            self.board.place(player, coord)
+        self.board.handle_action(action, player)
 
 
