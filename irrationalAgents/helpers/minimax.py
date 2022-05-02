@@ -5,39 +5,39 @@ from irrationalAgents.helpers.pieces import pieceAdvantage
 import copy
 
 
-def minimax(state, depth, action, curPlayer, ourPlayer):
-
-    # [best row, best col, best score]
-    if curPlayer == ourPlayer:
-        best = [-1, -1, -Infinity]
-    else:
-        best = [-1, -1, +Infinity]
+def minimax(state, depth, action, a, b, curPlayer, ourPlayer):
     
-
     if depth == MAX_DEPTH:
-        # score = evaluate(state)
-        return [-1, -1, evaluate(state, curPlayer)]
+        return evaluate(state, curPlayer)
 
-
-    # pruned_state = prune(state)
-    # for hex in pruned_state:
-
-    for hex in empty_hexes(state):
-        x, y = hex[0], hex[1] 
-        action = ("PLACE", x, y)
-        move = state.handle_action(action, _TOKEN_MAP_OUT[curPlayer])
-        score = minimax(state, depth + 1, action, _SWAP_PLAYER[curPlayer], ourPlayer)
-        state.undo_move(move)
-        score[0], score[1] = x, y 
-
-        if curPlayer == ourPlayer:
-            if score[2] > best[2]:
-                best = score
-        else:
-            if score[2] < best[2]:
-                best = score
-
-    return best
+    if curPlayer == ourPlayer:
+        value = -Infinity
+        for hex in empty_hexes(state):
+            x, y = hex[0], hex[1] 
+            action = ("PLACE", x, y)
+            move = state.handle_action(action, _TOKEN_MAP_OUT[curPlayer])
+            newValue = minimax(state, depth + 1, action, a, b, _SWAP_PLAYER[curPlayer], ourPlayer)
+            value = max(value, newValue)
+            state.undo_move(move)
+            if value >= b:
+                break;
+            a = max(a, value)
+        if depth == 0:
+            return (x, y)
+        return value
+    else:
+        value = +Infinity
+        for hex in empty_hexes(state):
+            x, y = hex[0], hex[1] 
+            action = ("PLACE", x, y)
+            move = state.handle_action(action, _TOKEN_MAP_OUT[curPlayer])
+            newValue = minimax(state, depth + 1, action, a, b, _SWAP_PLAYER[curPlayer], ourPlayer)
+            value = min(value, newValue)
+            state.undo_move(move)
+            if value <= a:
+                break;
+            b = min(b, value)
+        return value 
 
 def empty_hexes(state):
     empty_hexes = []
