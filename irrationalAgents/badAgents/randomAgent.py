@@ -51,6 +51,5 @@ class Player:
             self.board.swap()
 
         elif actionType == "PLACE":
-
             coord = tuple(args)
             self.board.place(player, coord)

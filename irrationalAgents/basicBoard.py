@@ -160,3 +160,32 @@ class Board:
         """
         return [_ADD(coord, step) for step in _HEX_STEPS \
             if self.inside_bounds(_ADD(coord, step))]
+
+    def handle_action(self, action, player):
+        captured = None
+
+        actionType, *args = action
+        if actionType == "STEAL":
+            # Apply STEAL action
+            self.swap()
+            return "STEAL"
+
+        elif actionType == "PLACE":
+
+            coord = tuple(args)
+            captured = self.place(player, coord)
+            return (player, coord, captured)
+
+    def undo_move(self, move):
+        
+        if move == None:
+            return
+        elif move == "STEAL":
+            self.swap()
+        
+        else:
+            self._data[move[1][0], move[1][1]] = 0
+            opponent = _SWAP_PLAYER[_TOKEN_MAP_IN[move[0]]]
+            for captured in move[2]:
+                self._data[captured[0]][captured[1]] = opponent
+
