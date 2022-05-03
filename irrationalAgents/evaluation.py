@@ -43,8 +43,7 @@ def getDijkstraDistance(color: int, board: Board = None) -> tuple:
     '''
     
     # Set starting edge. We check shortest path from all tiles on this edge to the opposite edge.
-    #edge = board.blue_start if color == 2 else board.red_start
-    edge = [(0,0)]
+    edge = board.blue_start if color == 2 else board.red_start
 
     shortestPaths = [dijkstraPath(tile, color, board) for tile in edge]
     
@@ -71,7 +70,11 @@ def dijkstraPath(tile: tuple, color: int, board: Board) -> tuple:
     destinationEdge = board.blue_end if color == 2 else board.red_end
 
     # all tiles on the board whose path lengths (from start tile) have been found by Dijkstra. All start as False.
-    lockedIn = np.zeros((len(board._data), len(board._data)), dtype=bool)
+    size = len(board._data)
+    lockedIn = np.zeros((size, size), dtype=bool)
+
+    # all tile costs are infinite until they are discovered
+    tileCosts = np.full((size,size), np.inf)
     
     # we haven't found a path yet. Let's initialise our priority queue to be used in Dijkstra's algorithm.
     
@@ -80,18 +83,21 @@ def dijkstraPath(tile: tuple, color: int, board: Board) -> tuple:
     (i, j) = tile
 
     if board._data[i][j] == color:
-        queue.put(dijkstraTile(tile, 0))
+        queueCost = 0
     elif board._data[i][j] == 0:
-        queue.put(dijkstraTile(tile, 1))
+        queueCost = 1
     else:
         # opposing color occupies start tile; no path possible
         return -1
     
+    queue.put(dijkstraTile(tile, queueCost))
+    tileCosts[i][j] = queueCost
+
     # perform dijkstra's algo over whole board until the closest destination tile is reached
     while queue.qsize() > 0:
         print("Queue size: " + str(queue.qsize()))
         tile = queue.get()
-        cost = tile.cost
+        expandCost = tile.cost
         
         print("Expanding: " + str(tile.coords))
        
@@ -118,13 +124,16 @@ def dijkstraPath(tile: tuple, color: int, board: Board) -> tuple:
             (i, j) = neighbour
 
             if board._data[i][j] == color:
-                print("same color")
-                print("putting in with " + str(cost))
-                queue.put(dijkstraTile(neighbour, cost, tile))
+                queueCost = expandCost
             elif board._data[i][j] == 0:
-                queue.put(dijkstraTile(neighbour, cost + 1, tile))
+                queueCost = expandCost + 1
             else:
                 continue
+
+            # if tile costs less than its current estimate, add it to the priority queue and update its cost in the tileCosts array
+            if queueCost < tileCosts[i][j]:
+                queue.put(dijkstraTile(neighbour, queueCost, tile))
+                tileCosts[i][j] = queueCost
     
     return (-1, None)
 
