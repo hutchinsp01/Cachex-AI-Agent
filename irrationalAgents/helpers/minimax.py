@@ -36,7 +36,7 @@ def minimax(state, depth, action, a, b, curPlayer, ourPlayer):
             score[0], score[1] = x, y
             if score[2] < best[2]:
                 best = score
-            if best[2] <= b:
+            if best[2] <= a:
                 break;
             b = max(b, best[2])
 
