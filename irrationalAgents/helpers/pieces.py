@@ -1,7 +1,10 @@
 from numpy import sign
 from irrationalAgents.basicBoard import _SWAP_PLAYER
+from irrationalAgents.basicBoard import Board
+from itertools import cycle
+import numpy as np
 
-def pieceAdvantage(state, player):
+def pieceAdvantage(state: Board, player: int):
     playerCount = 0
     opponentCount = 0
 
@@ -16,7 +19,7 @@ def pieceAdvantage(state, player):
 
     return playerCount - opponentCount
 
-def avgDistanceFromCentre(state, player):
+def avgDistanceFromCentre(state: Board, player: int):
     playerSum = 0
     playerCount = 0
 
@@ -35,7 +38,7 @@ def avgDistanceFromCentre(state, player):
     
     return 1 / playerTotal
 
-def manhatten_distance(cur, goal):
+def manhatten_distance(cur: tuple, goal: tuple):
     dx = cur[0] - goal[0]
     dy = cur[1] - goal[1]
 
@@ -43,3 +46,24 @@ def manhatten_distance(cur, goal):
         return abs(dx + dy)
     
     return max(abs(dx), abs(dy))
+
+def triangle_structures(state: Board, hex: tuple, player: int) -> int:
+    '''
+    Evaluates the number of triangle structures a hex addition will form.
+    These are desirable as they are less susceptible to capture.
+    '''
+    triangleCount = 0
+    neighbourCycle = cycle(state._coord_neighbours(hex))
+    curNeighbour = next(neighbourCycle)
+    
+    # go through all 6 neighbours, minus the first one
+    for i in range(5):
+        (x1, y1) = curNeighbour
+        nextNeighbour = next(neighbourCycle)
+        (x2, y2) = nextNeighbour
+        if (state._data[x1][y1] == player) and (state._data[x2][y2] == player):
+            triangleCount += 1
+
+        curNeighbour = nextNeighbour
+    
+    return triangleCount
