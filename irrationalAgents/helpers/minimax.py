@@ -2,7 +2,7 @@ from numpy import Infinity
 from irrationalAgents.basicBoard import _SWAP_PLAYER, _TOKEN_MAP_OUT
 from irrationalAgents.constants import MAX_DEPTH
 from irrationalAgents.helpers.pieces import pieceAdvantage
-from evaluation import dijkstraEvalScore
+from irrationalAgents.helpers.evaluation import dijkstraEvalScore
 import copy
 
 
@@ -49,7 +49,7 @@ def empty_hexes(state):
     return empty_hexes
 
 def evaluate(state, player: int):
-    score = dijkstraEvalScore(state._data, player)
+    score = dijkstraEvalScore(player, state)
     return score
 
 

@@ -1,40 +1,41 @@
 import numpy as np
-from basicBoard import Board
+from irrationalAgents.basicBoard import Board
 from queue import PriorityQueue
-from dijkstraTile import dijkstraTile
+from irrationalAgents.helpers.dijkstraTile import dijkstraTile
 import sys, json
 
-def main():
-    try:
-        with open(sys.argv[1]) as file:
-            data = json.load(file)
-            board = handle_input(data)
-            print(board._data)
-            print("Evaluation score for blue: " + str(dijkstraEvalScore(2, board)))
+# def main():
+#     try:
+#         with open(sys.argv[1]) as file:
+#             data = json.load(file)
+#             board = handle_input(data)
+#             print(board._data)
+#             print("Evaluation score for blue: " + str(dijkstraEvalScore(2, board)))
 
-    except IndexError:
-        print("usage: python3 evaluation.py path/to/input.json", file=sys.stderr)
-        sys.exit(1)
+#     except IndexError:
+#         print("usage: python3 evaluation.py path/to/input.json", file=sys.stderr)
+#         sys.exit(1)
     
-    return
+#     return
 
-def handle_input(file):
-    size = file["n"]
-    start = (file["start"][0], file["start"][1])
-    goal = (file["goal"][0], file["goal"][1])
+# def handle_input(file):
+#     size = file["n"]
+#     start = (file["start"][0], file["start"][1])
+#     goal = (file["goal"][0], file["goal"][1])
     
-    board = np.zeros((size, size), dtype=int)
-    conversion = {"b" : 2, "r" : 1}
+#     board = np.zeros((size, size), dtype=int)
+#     conversion = {"b" : 2, "r" : 1}
     
-    for tile in file["board"]:
-        board[tile[1]][tile[2]] = conversion[tile[0]]
+#     for tile in file["board"]:
+#         board[tile[1]][tile[2]] = conversion[tile[0]]
 
-    return Board(size, board)
+#     return Board(size, board)
 
 def dijkstraEvalScore(playerColor: int, board: Board) -> int:
     '''
     Returns eval score based on difference between shortest path completion for opposition and shortest path completion for player
     '''
+    # print("Player color = " + str(playerColor))
     oppositionColor = 1 if playerColor == 2 else 2
     return getDijkstraDistance(oppositionColor, board) - getDijkstraDistance(playerColor, board)
 
@@ -57,8 +58,6 @@ def getDijkstraDistance(color: int, board: Board = None) -> int:
     min = np.inf
     shortestPath = []
     for (cost, path) in shortestPaths:
-        print(cost)
-        print(path)
         if cost < min:
             min = cost
             # shortestPath = path
@@ -100,15 +99,11 @@ def dijkstraPath(tile: tuple, color: int, board: Board) -> tuple:
 
     # perform dijkstra's algo over whole board until the closest destination tile is reached
     while queue.qsize() > 0:
-        print("Queue size: " + str(queue.qsize()))
         tile = queue.get()
         expandCost = tile.cost
-        
-        print("Expanding: " + str(tile.coords))
-       
+
         # check if we have hit a destination tile
         if tile.coords in destinationEdge:
-            print("Hit!")
             # lock in the destination tile, then create a list of the tiles on the path to it
             lockedIn[tile.coords[0]][tile.coords[1]] = True
             path = []
@@ -125,7 +120,6 @@ def dijkstraPath(tile: tuple, color: int, board: Board) -> tuple:
         
         lockedIn[tile.coords[0]][tile.coords[1]] = True
         for neighbour in board._coord_neighbours(tile.coords):
-            print(neighbour)
             (i, j) = neighbour
 
             if board._data[i][j] == color:
@@ -141,5 +135,3 @@ def dijkstraPath(tile: tuple, color: int, board: Board) -> tuple:
                 tileCosts[i][j] = queueCost
     
     return (np.inf, None)
-
-main()
