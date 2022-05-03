@@ -22,7 +22,7 @@ def minimax(state, depth, action, a, b, curPlayer, ourPlayer):
             score[0], score[1] = x, y
             if score[2] > best[2]:
                 best = score
-            if best[2] >= b:
+            if best[2] >= (b - 1):
                 break;
             a = max(a, best[2])
     else:
@@ -36,9 +36,13 @@ def minimax(state, depth, action, a, b, curPlayer, ourPlayer):
             score[0], score[1] = x, y
             if score[2] < best[2]:
                 best = score
-            if best[2] <= a:
+            if best[2] <= (a + 1) :
                 break;
             b = max(b, best[2])
+
+    if best[0] == -1 or best[1] == -1:
+        empty_hex = empty_hexes(state)[0]
+        best[0], best[1] = empty_hex[0], empty_hex[1]
 
     return best
 
