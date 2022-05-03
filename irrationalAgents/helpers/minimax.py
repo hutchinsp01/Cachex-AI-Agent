@@ -1,7 +1,7 @@
 from numpy import Infinity
 from irrationalAgents.basicBoard import _SWAP_PLAYER, _TOKEN_MAP_OUT
 from irrationalAgents.constants import MAX_DEPTH
-from irrationalAgents.helpers.pieces import pieceAdvantage
+from irrationalAgents.helpers.pieces import pieceAdvantage, avgDistanceFromCentre
 from irrationalAgents.helpers.evaluation import dijkstraEvalScore
 import copy
 
@@ -9,36 +9,39 @@ import copy
 def minimax(state, depth, action, a, b, curPlayer, ourPlayer):
     
     if depth == MAX_DEPTH:
-        return evaluate(state, curPlayer)
+        return [-1, -1, evaluate(state, curPlayer)]
 
     if curPlayer == ourPlayer:
-        value = -Infinity
+        best = [-1, -1, -Infinity]
         for hex in empty_hexes(state):
-            x, y = hex[0], hex[1] 
+            x, y = hex[0], hex[1]
             action = ("PLACE", x, y)
             move = state.handle_action(action, _TOKEN_MAP_OUT[curPlayer])
-            newValue = minimax(state, depth + 1, action, a, b, _SWAP_PLAYER[curPlayer], ourPlayer)
-            value = max(value, newValue)
+            score = minimax(state, depth + 1, action, a, b, _SWAP_PLAYER[curPlayer], ourPlayer)
             state.undo_move(move)
-            if value >= b:
+            score[0], score[1] = x, y
+            if score[2] > best[2]:
+                best = score
+            if best[2] >= b:
                 break;
-            a = max(a, value)
-        if depth == 0:
-            return (x, y)
-        return value
+            a = max(a, best[2])
     else:
-        value = +Infinity
+        best = [-1, -1, Infinity]
         for hex in empty_hexes(state):
-            x, y = hex[0], hex[1] 
+            x, y = hex[0], hex[1]
             action = ("PLACE", x, y)
             move = state.handle_action(action, _TOKEN_MAP_OUT[curPlayer])
-            newValue = minimax(state, depth + 1, action, a, b, _SWAP_PLAYER[curPlayer], ourPlayer)
-            value = min(value, newValue)
+            score = minimax(state, depth + 1, action, a, b, _SWAP_PLAYER[curPlayer], ourPlayer)
             state.undo_move(move)
-            if value <= a:
+            score[0], score[1] = x, y
+            if score[2] < best[2]:
+                best = score
+            if best[2] <= b:
                 break;
-            b = min(b, value)
-        return value 
+            b = max(b, best[2])
+
+    return best
+
 
 def empty_hexes(state):
     empty_hexes = []
@@ -49,7 +52,7 @@ def empty_hexes(state):
     return empty_hexes
 
 def evaluate(state, player: int):
-    score = dijkstraEvalScore(player, state)
+    score = 2 * dijkstraEvalScore(player, state) + avgDistanceFromCentre(state, player) + 2 * pieceAdvantage(state, player)
     return score
 
 
