@@ -10,7 +10,8 @@ class Player:
         as Blue.
         """
         # put your code here
-
+        self.boardSize = n
+        self.player = player
 
     def action(self):
         """
@@ -18,7 +19,7 @@ class Player:
         of the game, select an action to play.
         """
         # put your code here
-
+        
 
     
     def turn(self, player, action):
