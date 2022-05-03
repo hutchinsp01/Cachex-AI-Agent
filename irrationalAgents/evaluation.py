@@ -10,10 +10,7 @@ def main():
             data = json.load(file)
             board = handle_input(data)
             print(board._data)
-            (cost, path) = getDijkstraDistance(2, board)
-            print("Cost = " + str(cost))
-            print("Path = ")
-            print(path)
+            print("Evaluation score for blue: " + str(dijkstraEvalScore(2, board)))
 
     except IndexError:
         print("usage: python3 evaluation.py path/to/input.json", file=sys.stderr)
@@ -34,8 +31,16 @@ def handle_input(file):
 
     return Board(size, board)
 
+def dijkstraEvalScore(playerColor: int, board: Board) -> int:
+    '''
+    Returns eval score based on difference between shortest path completion for opposition and shortest path completion for player
+    '''
+    oppositionColor = 1 if playerColor == 2 else 2
+    return getDijkstraDistance(oppositionColor, board) - getDijkstraDistance(playerColor, board)
 
-def getDijkstraDistance(color: int, board: Board = None) -> tuple:
+
+
+def getDijkstraDistance(color: int, board: Board = None) -> int:
     '''
     Function is applied to a board state. Returns the number of hexes
     needed to complete the shortest path between edges of the board for 
@@ -56,9 +61,9 @@ def getDijkstraDistance(color: int, board: Board = None) -> tuple:
         print(path)
         if cost < min:
             min = cost
-            shortestPath = path
+            # shortestPath = path
     
-    return (min, shortestPath)
+    return min
 
 def dijkstraPath(tile: tuple, color: int, board: Board) -> tuple:
     '''
@@ -88,7 +93,7 @@ def dijkstraPath(tile: tuple, color: int, board: Board) -> tuple:
         queueCost = 1
     else:
         # opposing color occupies start tile; no path possible
-        return -1
+        return (np.inf, None)
     
     queue.put(dijkstraTile(tile, queueCost))
     tileCosts[i][j] = queueCost
@@ -135,6 +140,6 @@ def dijkstraPath(tile: tuple, color: int, board: Board) -> tuple:
                 queue.put(dijkstraTile(neighbour, queueCost, tile))
                 tileCosts[i][j] = queueCost
     
-    return (-1, None)
+    return (np.inf, None)
 
 main()
