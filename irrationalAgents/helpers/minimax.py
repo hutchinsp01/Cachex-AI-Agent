@@ -1,19 +1,21 @@
 from numpy import Infinity
 from irrationalAgents.basicBoard import _SWAP_PLAYER, _TOKEN_MAP_OUT
 from irrationalAgents.constants import MAX_DEPTH
-from irrationalAgents.helpers.pieces import pieceAdvantage, avgDistanceFromCentre
+from irrationalAgents.helpers.pieces import pieceAdvantage, avgDistanceFromCentre, triangle_structures
 from irrationalAgents.helpers.evaluation import dijkstraEvalScore
 import copy
 
 
 def minimax(state, depth, action, a, b, curPlayer, ourPlayer):
-    
+    print("Depth = " + str(depth))
+    print("Minimaxing move: Player " + str(curPlayer) + " " + str(action))
     if depth == MAX_DEPTH:
-        return [-1, -1, evaluate(state, curPlayer)]
+        return [-1, -1, evaluate(state, curPlayer, action)]
 
     if curPlayer == ourPlayer:
         best = [-1, -1, -Infinity]
         for hex in empty_hexes(state):
+            
             x, y = hex[0], hex[1]
             action = ("PLACE", x, y)
             move = state.handle_action(action, _TOKEN_MAP_OUT[curPlayer])
@@ -55,8 +57,11 @@ def empty_hexes(state):
                         empty_hexes.append((i, j))
     return empty_hexes
 
-def evaluate(state, player: int):
-    score = 2 * dijkstraEvalScore(player, state) + avgDistanceFromCentre(state, player) + 2 * pieceAdvantage(state, player)
+def evaluate(state, player: int, action: tuple):
+    print("EVAL! Action: " + str(action))
+    val = triangle_structures(state, (action[1], action[2]), player)
+    print("Triangle structures formable = " + str(val))
+    score = 9 * val
     return score
 
 

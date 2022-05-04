@@ -52,18 +52,24 @@ def triangle_structures(state: Board, hex: tuple, player: int) -> int:
     Evaluates the number of triangle structures a hex addition will form.
     These are desirable as they are less susceptible to capture.
     '''
+    print("Player: " + str(player))
+    print("State: ")
+    print(state._data)
     triangleCount = 0
-    neighbourCycle = cycle(state._coord_neighbours(hex))
+    neighbours = state._coord_neighbours(hex)
+    neighbourCycle = cycle(neighbours)
     curNeighbour = next(neighbourCycle)
     
     # go through all 6 neighbours, minus the first one
-    for i in range(5):
+    for i in range(len(neighbours)):
+        print(i)
         (x1, y1) = curNeighbour
+        print(curNeighbour)
         nextNeighbour = next(neighbourCycle)
         (x2, y2) = nextNeighbour
         if (state._data[x1][y1] == player) and (state._data[x2][y2] == player):
             triangleCount += 1
 
         curNeighbour = nextNeighbour
-    
+    print("Done")
     return triangleCount
