@@ -1,1 +1,1 @@
-MAX_DEPTH = 2
+MAX_DEPTH = 3

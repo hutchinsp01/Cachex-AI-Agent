@@ -47,29 +47,29 @@ def manhatten_distance(cur: tuple, goal: tuple):
     
     return max(abs(dx), abs(dy))
 
-def triangle_structures(state: Board, hex: tuple, player: int) -> int:
+def triangle_structures(state: Board, player: int) -> int:
     '''
-    Evaluates the number of triangle structures a hex addition will form.
+    Evaluates the number of triangle structures present for a player.
     These are desirable as they are less susceptible to capture.
     '''
-    print("Player: " + str(player))
-    print("State: ")
-    print(state._data)
-    triangleCount = 0
-    neighbours = state._coord_neighbours(hex)
-    neighbourCycle = cycle(neighbours)
-    curNeighbour = next(neighbourCycle)
     
-    # go through all 6 neighbours, minus the first one
-    for i in range(len(neighbours)):
-        print(i)
-        (x1, y1) = curNeighbour
-        print(curNeighbour)
-        nextNeighbour = next(neighbourCycle)
-        (x2, y2) = nextNeighbour
-        if (state._data[x1][y1] == player) and (state._data[x2][y2] == player):
-            triangleCount += 1
+    triangleCount = 0
+    for i in range(state.n):
+        for j in range(state.n):
+            # if hex is friendly, check how many triangles it is a part of
+            if state._data[i][j] == player:
+                neighbours = state._coord_neighbours((i, j))
+                neighbourCycle = cycle(neighbours)
+                curNeighbour = next(neighbourCycle)
+                
+                # go through all 6 neighbours, minus the first one
+                for k in range(len(neighbours)):
+                    (x1, y1) = curNeighbour
+                    nextNeighbour = next(neighbourCycle)
+                    (x2, y2) = nextNeighbour
+                    if (state._data[x1][y1] == player) and (state._data[x2][y2] == player):
+                        triangleCount += 1
 
-        curNeighbour = nextNeighbour
-    print("Done")
+                    curNeighbour = nextNeighbour
+                
     return triangleCount
