@@ -31,50 +31,48 @@ import sys, json
 
 #     return Board(size, board)
 
-def dijkstraEvalScore(playerColor: int, board: Board) -> int:
+def dijkstraEvalScore(playerColor: int, board: Board, shortestPaths: tuple) -> int:
     '''
     Returns eval score based on difference between shortest path completion for opposition and shortest path completion for player
     '''
     # print("Player color = " + str(playerColor))
-    # oppositionColor = 1 if playerColor == 2 else 2
-    # return getDijkstraDistance(oppositionColor, board) - getDijkstraDistance(playerColor, board)
-    # score = getDijkstraDistance(playerColor, board)
-    # if score == 0:
-    #     return np.Inf
-    try:
-        return getDijkstraDistance(playerColor, board)
-    except:
-        return 10000
+    oppositionColor = 1 if playerColor == 2 else 2
+    n = board.n
+    ourDistance = None
+    opponentDistance = None
 
+    if shortestPaths[0] < n/2:
+        ourDistance = getDijkstraDistance(playerColor, board)
+    if shortestPaths[1] < n/2:
+        opponentDistance = getDijkstraDistance(oppositionColor, board)
 
-def getDijkstraDistance(color: int, board: Board = None) -> int:
-    '''
-    Function is applied to a board state. Returns the number of hexes
-    needed to complete the shortest path between edges of the board for 
-    a particular colour (1 = red, 2 = blue).
-    '''
+    if ourDistance == None and opponentDistance == None:
+        return 0
+
+    if ourDistance == None and opponentDistance != None:
+        return opponentDistance
+
+    if ourDistance == 0:
+        return np.inf
     
-    # Set starting edge. We check shortest path from all tiles on this edge to the opposite edge.
-    edge = board.blue_start if color == 2 else board.red_start
-
-    shortestPaths = [dijkstraPath(tile, color, board) for tile in edge]
+    if ourDistance != None and opponentDistance == None:
+        try:
+            return 1/ourDistance
+        except:
+            return np.inf
     
-    # go through all shortest paths from start edge to end edge and return the path cost,
-    # and path tiles, of said path
-    min = np.inf
-    shortestPath = []
-    for (cost, path) in shortestPaths:
-        if cost < min:
-            min = cost
-            # shortestPath = path
-    
-    return min
+    else:
+        return opponentDistance - ourDistance
 
-def dijkstraPath(tile: tuple, color: int, board: Board) -> tuple:
+    
+
+def getDijkstraDistance(color: int, board: Board) -> int:
     '''
     Returns the number of hexes needed to complete the shortest path from a particular starting tile
     to an edge, as well as the coords of all tiles on that path
     '''
+
+    startEdge = board.blue_start if color == 2 else board.red_start
     
     # figure out our destination
     destinationEdge = board.blue_end if color == 2 else board.red_end
@@ -90,18 +88,20 @@ def dijkstraPath(tile: tuple, color: int, board: Board) -> tuple:
     
     found = False
     queue = PriorityQueue()
-    (i, j) = tile
 
-    if board._data[i][j] == color:
-        queueCost = 0
-    elif board._data[i][j] == 0:
-        queueCost = 1
-    else:
-        # opposing color occupies start tile; no path possible
-        return (np.inf, None)
-    
-    queue.put(dijkstraTile(tile, queueCost))
-    tileCosts[i][j] = queueCost
+    for tile in startEdge:
+        (i, j) = tile
+
+        if board._data[i][j] == color:
+            queueCost = 0
+        elif board._data[i][j] == 0:
+            queueCost = 1
+        else:
+            # opposing color occupies start tile; no path possible
+            continue
+        
+        queue.put(dijkstraTile(tile, queueCost))
+        tileCosts[i][j] = queueCost
 
     # perform dijkstra's algo over whole board until the closest destination tile is reached
     while queue.qsize() > 0:
@@ -118,7 +118,8 @@ def dijkstraPath(tile: tuple, color: int, board: Board) -> tuple:
                 path.insert(0, pathNode.coords)
                 pathNode = pathNode.parent
             
-            return (tile.cost, path)
+            # return (tile.cost, path)
+            return tile.cost
         
         # if this tile already has a locked-in cost value, we ignore it and move on
         if lockedIn[tile.coords[0]][tile.coords[1]]:
@@ -140,4 +141,5 @@ def dijkstraPath(tile: tuple, color: int, board: Board) -> tuple:
                 queue.put(dijkstraTile(neighbour, queueCost, tile))
                 tileCosts[i][j] = queueCost
     
-    return (np.inf, None)
+    # return (np.inf, None)
+    return np.inf
