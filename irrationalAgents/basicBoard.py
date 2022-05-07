@@ -188,6 +188,7 @@ class Board:
         elif move == "STEAL":
             self.swap()
             # cancel out turn count increase
+            self.turns_taken -= 1
         else:
             self._data[move[1][0], move[1][1]] = 0
             opponent = _SWAP_PLAYER[_TOKEN_MAP_IN[move[0]]]
