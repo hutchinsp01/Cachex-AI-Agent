@@ -23,20 +23,18 @@ def avgDistanceFromCentre(state: Board, player: int):
     playerSum = 0
     playerCount = 0
 
-    centre = len(state._data) / 2
+    centre = (len(state._data) - 1) / 2
     centre = (centre, centre)
 
     for i in range (0, len(state._data)):
-            for j in range(0, len(state._data)):
-                if state._data[i][j] == player:
-                    playerCount += 1
-                    playerSum += manhatten_distance((i, j), centre)
+        for j in range(0, len(state._data)):
+            if state._data[i][j] == player:
+                playerCount += 1
+                playerSum += manhatten_distance((i, j), centre)
 
     playerTotal =  (playerSum / playerCount) if playerCount != 0 else 0
-    if playerTotal == 0:
-        return 0
     
-    return 1 / playerTotal
+    return playerTotal
 
 def manhatten_distance(cur: tuple, goal: tuple):
     dx = cur[0] - goal[0]
@@ -47,23 +45,29 @@ def manhatten_distance(cur: tuple, goal: tuple):
     
     return max(abs(dx), abs(dy))
 
-def triangle_structures(state: Board, hex: tuple, player: int) -> int:
+def triangle_structures(state: Board, player: int) -> int:
     '''
-    Evaluates the number of triangle structures a hex addition will form.
+    Evaluates the number of triangle structures present for a player.
     These are desirable as they are less susceptible to capture.
     '''
+    
     triangleCount = 0
-    neighbourCycle = cycle(state._coord_neighbours(hex))
-    curNeighbour = next(neighbourCycle)
-    
-    # go through all 6 neighbours, minus the first one
-    for i in range(5):
-        (x1, y1) = curNeighbour
-        nextNeighbour = next(neighbourCycle)
-        (x2, y2) = nextNeighbour
-        if (state._data[x1][y1] == player) and (state._data[x2][y2] == player):
-            triangleCount += 1
+    for i in range(state.n):
+        for j in range(state.n):
+            # if hex is friendly, check how many triangles it is a part of
+            if state._data[i][j] == player:
+                neighbours = state._coord_neighbours((i, j))
+                neighbourCycle = cycle(neighbours)
+                curNeighbour = next(neighbourCycle)
+                
+                # go through all neighbours, minus the first one
+                for k in range(len(neighbours)):
+                    (x1, y1) = curNeighbour
+                    nextNeighbour = next(neighbourCycle)
+                    (x2, y2) = nextNeighbour
+                    if (state._data[x1][y1] == player) and (state._data[x2][y2] == player):
+                        triangleCount += 1
 
-        curNeighbour = nextNeighbour
-    
+                    curNeighbour = nextNeighbour
+                
     return triangleCount

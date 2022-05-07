@@ -56,6 +56,9 @@ class Board:
         self.red_start = [(j, i) for (i, j) in self.blue_start]
         self.red_end = [(j, i) for (i, j) in self.blue_end]
 
+        # initialise number of turns taken.
+        self.turns_taken = 0
+
     def __getitem__(self, coord):
         """
         Get the token at given board coord (r, q).
@@ -81,6 +84,7 @@ class Board:
         board axis. This is really just a "matrix transpose" op combined
         with a swap between player token types.
         """
+        self.turns_taken += 1
         swap_player_tokens = vectorize(lambda t: _SWAP_PLAYER[t])
         self._data = swap_player_tokens(self._data.transpose())
 
@@ -89,6 +93,7 @@ class Board:
         Place a token on the board and apply captures if they exist.
         Return coordinates of captured tokens.
         """
+        self.turns_taken += 1
         self[coord] = token
         return self._apply_captures(coord)
 
@@ -182,10 +187,14 @@ class Board:
             return
         elif move == "STEAL":
             self.swap()
-        
+            # cancel out turn count increase
+            self.turns_taken -= 1
         else:
             self._data[move[1][0], move[1][1]] = 0
             opponent = _SWAP_PLAYER[_TOKEN_MAP_IN[move[0]]]
             for captured in move[2]:
                 self._data[captured[0]][captured[1]] = opponent
+
+        # decrement turn count
+        self.turns_taken -= 1
 
