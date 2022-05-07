@@ -16,7 +16,7 @@ def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer 
     
     # Check if victory has been achieved. If so, we don't need to keep making moves on this state.
     victory = 0
-    if state.turns_taken >= (2 * state.n - 1):
+    if state.turns_taken >= (2 * state.n - 1) and action is not None:
         victory = check_winner(state, action, curPlayer, ourPlayer)
         if victory == 1 or victory == -1:
             return [action[1], action[2], victory]
@@ -27,21 +27,32 @@ def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer 
 
     # If we haven't hit max depth and victory hasn't been achieved, time to explore deeper.
     if curPlayer == ourPlayer:
+        # Best outcome starts out at -inf w.r.t our player
         best = [-1, -1, -Infinity]
+        
         for hex in empty_hexes(state):
-
+            # place piece in hex, then run minimax on the resulting state
             x, y = hex[0], hex[1]
             action = ("PLACE", x, y)
             move = state.handle_action(action, _TOKEN_MAP_OUT[curPlayer])
             score = minimax(state, depth + 1, action, a, b, _SWAP_PLAYER[curPlayer], ourPlayer)
+            
+            # revert the action, so that a new one can be performed for the next hex
             state.undo_move(move)
+            
+            # if eval score surpasses the current best, we have a new best move
             score[0], score[1] = x, y
             if score[2] > best[2]:
                 best = score
-            if best[2] >= (b - 1):
-                break;
+
+            # if our maximizing player hits a score that is greater than what the minimizing player will consider, break. This board state is now irrelevant and the rest of the possible moves are pruned.
+            if best[2] >= (b):
+                break
+            
+            # update alpha so moves further down the minimax tree can use it as a reference
             a = max(a, best[2])
     else:
+        # Best outcome starts at inf w.r.t our player
         best = [-1, -1, Infinity]
         for hex in empty_hexes(state):
             x, y = hex[0], hex[1]
@@ -50,16 +61,22 @@ def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer 
             score = minimax(state, depth + 1, action, a, b, _SWAP_PLAYER[curPlayer], ourPlayer)
             state.undo_move(move)
             score[0], score[1] = x, y
+            
             if score[2] < best[2]:
                 best = score
-            if best[2] <= (a + 1) :
-                break;
-            b = max(b, best[2])
+            
+            if best[2] <= (a) :
+                break
+            
+            b = min(b, best[2])
 
     if best[0] == -1 or best[1] == -1:
         empty_hex = empty_hexes(state)[0]
         best[0], best[1] = empty_hex[0], empty_hex[1]
 
+    print("Given state:")
+    print_state(state._data)
+    print(f"The best move for {curPlayer} is {str(best)}")
     return best
 
 def check_winner(state, action, curPlayer: int, ourPlayer: int) -> int:
@@ -98,14 +115,32 @@ def evaluate(state, player: int, action: tuple):
     Evaluation or utility function. 
     Returns a value for the 'desirability' of a board state based upon an evaluation of certain features.
     '''
+    dijkstraScore = dijkstraEvalScore(player, state)
+    avgDistanceScore = -1 * avgDistanceFromCentre(state, player)
+    pieceAdvantageScore = pieceAdvantage(state, player)
+    triangeStructureScore = triangle_structures(state, player) / 3
     
-    
-    score = 2 * dijkstraEvalScore(player, state) + avgDistanceFromCentre(state, player) + 2 * pieceAdvantage(state, player) + triangle_structures(state, player)
+    score = 2 * dijkstraScore + avgDistanceScore + 2 * pieceAdvantageScore + triangeStructureScore
 
-    print("EVAL! Action: " + str(action) + ". with respect to player " + str(player) + ". Score = " + str(score) + ".")
+    print("EVAL! Action: " + str(action) + ". with respect to player " + str(player) + ". Score = " + str(np.arctan(score)/(np.pi/2)) + ".")
+    print(f"Dijkstra: {dijkstraScore}, Distance: {avgDistanceScore}, Piece Advantage: {pieceAdvantageScore}, Triangle Structure: {triangeStructureScore}")
+    print("State:")
+    print_state(state._data)
     
     # Normalise the score so that it lies in the range [-1, 1]. Note that the extremes are only possible in the case of victory or loss.
     return np.arctan(score)/(np.pi/2)
+
+def print_state(data):
+    '''
+    Convenient function for printing state that doesn't need the provided render aesthetic.
+    Provides a better visual representation of the board than a 2D array.
+    '''
+    indentDepth = len(data)
+    for row in data[::-1]:
+        indent = indentDepth * " "
+        print(indent + str(row))
+        indentDepth -= 1
+    return
 
 
 

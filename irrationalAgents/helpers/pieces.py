@@ -23,20 +23,18 @@ def avgDistanceFromCentre(state: Board, player: int):
     playerSum = 0
     playerCount = 0
 
-    centre = len(state._data) / 2
+    centre = (len(state._data) - 1) / 2
     centre = (centre, centre)
 
     for i in range (0, len(state._data)):
-            for j in range(0, len(state._data)):
-                if state._data[i][j] == player:
-                    playerCount += 1
-                    playerSum += manhatten_distance((i, j), centre)
+        for j in range(0, len(state._data)):
+            if state._data[i][j] == player:
+                playerCount += 1
+                playerSum += manhatten_distance((i, j), centre)
 
     playerTotal =  (playerSum / playerCount) if playerCount != 0 else 0
-    if playerTotal == 0:
-        return 0
     
-    return 1 / playerTotal
+    return playerTotal
 
 def manhatten_distance(cur: tuple, goal: tuple):
     dx = cur[0] - goal[0]
