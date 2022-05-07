@@ -2,7 +2,7 @@ from numpy import Infinity
 import numpy as np
 from irrationalAgents.basicBoard import _SWAP_PLAYER, _TOKEN_MAP_OUT
 from irrationalAgents.constants import MAX_DEPTH
-from irrationalAgents.helpers.pieces import pieceAdvantage, avgDistanceFromCentre, triangle_structures
+from irrationalAgents.helpers.pieces import manhatten_distance, pieceAdvantage, avgDistanceFromCentre, triangle_structures
 from irrationalAgents.helpers.evaluation import dijkstraEvalScore
 import copy
 
@@ -15,11 +15,11 @@ def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer 
     # print(state._data)
     
     # Check if victory has been achieved. If so, we don't need to keep making moves on this state.
-    victory = 0
-    if state.turns_taken >= (2 * state.n - 1) and action is not None:
-        victory = check_winner(state, action, curPlayer, ourPlayer)
-        if victory == 1 or victory == -1:
-            return [action[1], action[2], victory]
+    # victory = 0
+    # if state.turns_taken >= (2 * state.n - 1) and action is not None:
+    #     victory = check_winner(state, action, curPlayer, ourPlayer)
+    #     if victory == 1 or victory == -1:
+    #         return [action[1], action[2], victory]
 
     # If we have hit max depth for minimax (and there's no victory), it's time to evaluate the board state.
     if depth == MAX_DEPTH:
@@ -74,12 +74,12 @@ def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer 
         empty_hex = empty_hexes(state)[0]
         best[0], best[1] = empty_hex[0], empty_hex[1]
 
-    print("Given state:")
-    print_state(state._data)
-    print(f"The best move for {curPlayer} is {str(best)}")
+    # print("Given state:")
+    # print_state(state._data)
+    # print(f"The best move for {curPlayer} is {str(best)}")
     return best
 
-def check_winner(state, action, curPlayer: int, ourPlayer: int) -> int:
+def check_winner(state, action, curPlayer: int) -> int:
     '''
     Checks if victory has been achieved. 
     Returns -1 if loss, 0 if no victory, 1 if victory, w.r.t ourPlayer.
@@ -93,8 +93,8 @@ def check_winner(state, action, curPlayer: int, ourPlayer: int) -> int:
     axis_vals = [coord[axis] for coord in reachable]
     
     if min(axis_vals) == 0 and max(axis_vals) == state.n - 1:
-        # we have a win for curPlayer! figure out if that's a win for our player or a loss
-        return 1 if curPlayer == ourPlayer else -1
+        # we have a win for curPlayer!
+        return 1
     
     return 0
 
@@ -108,24 +108,27 @@ def empty_hexes(state):
             for j in range(0, state.n):
                     if state._data[i][j] == 0:
                         empty_hexes.append((i, j))
-    return empty_hexes
+
+    return sorted(empty_hexes, key=lambda x: manhatten_distance(x, (state.n//2, state.n//2)), reverse=True )
+
 
 def evaluate(state, player: int, action: tuple):
     '''
     Evaluation or utility function. 
     Returns a value for the 'desirability' of a board state based upon an evaluation of certain features.
     '''
+
     dijkstraScore = dijkstraEvalScore(player, state)
     avgDistanceScore = -1 * avgDistanceFromCentre(state, player)
     pieceAdvantageScore = pieceAdvantage(state, player)
     triangeStructureScore = triangle_structures(state, player) / 3
     
-    score = 2 * dijkstraScore + avgDistanceScore + 2 * pieceAdvantageScore + triangeStructureScore
+    score = 3 * dijkstraScore + avgDistanceScore + 2 * pieceAdvantageScore + triangeStructureScore
 
-    print("EVAL! Action: " + str(action) + ". with respect to player " + str(player) + ". Score = " + str(np.arctan(score)/(np.pi/2)) + ".")
-    print(f"Dijkstra: {dijkstraScore}, Distance: {avgDistanceScore}, Piece Advantage: {pieceAdvantageScore}, Triangle Structure: {triangeStructureScore}")
-    print("State:")
-    print_state(state._data)
+    # print("EVAL! Action: " + str(action) + ". with respect to player " + str(player) + ". Score = " + str(np.arctan(score)/(np.pi/2)) + ".")
+    # print(f"Dijkstra: {dijkstraScore}, Distance: {avgDistanceScore}, Piece Advantage: {pieceAdvantageScore}, Triangle Structure: {triangeStructureScore}")
+    # print("State:")
+    # print_state(state._data)
     
     # Normalise the score so that it lies in the range [-1, 1]. Note that the extremes are only possible in the case of victory or loss.
     return np.arctan(score)/(np.pi/2)

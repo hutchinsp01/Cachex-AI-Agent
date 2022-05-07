@@ -38,7 +38,13 @@ def dijkstraEvalScore(playerColor: int, board: Board) -> int:
     # print("Player color = " + str(playerColor))
     # oppositionColor = 1 if playerColor == 2 else 2
     # return getDijkstraDistance(oppositionColor, board) - getDijkstraDistance(playerColor, board)
-    return board.n - getDijkstraDistance(playerColor, board)
+    # score = getDijkstraDistance(playerColor, board)
+    # if score == 0:
+    #     return np.Inf
+    try:
+        return getDijkstraDistance(playerColor, board)
+    except:
+        return 10000
 
 
 def getDijkstraDistance(color: int, board: Board = None) -> int:
