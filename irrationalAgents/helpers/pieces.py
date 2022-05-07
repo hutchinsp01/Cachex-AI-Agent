@@ -60,7 +60,7 @@ def triangle_structures(state: Board, player: int) -> int:
                 neighbourCycle = cycle(neighbours)
                 curNeighbour = next(neighbourCycle)
                 
-                # go through all 6 neighbours, minus the first one
+                # go through all neighbours, minus the first one
                 for k in range(len(neighbours)):
                     (x1, y1) = curNeighbour
                     nextNeighbour = next(neighbourCycle)
