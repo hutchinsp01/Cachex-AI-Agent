@@ -2,7 +2,7 @@ from numpy import Infinity
 import numpy as np
 from irrationalAgents.basicBoard import _SWAP_PLAYER, _TOKEN_MAP_OUT
 from irrationalAgents.constants import MAX_DEPTH
-from irrationalAgents.helpers.pieces import manhatten_distance, pieceAdvantage, avgDistanceFromCentre, triangle_structures
+from irrationalAgents.helpers.pieces import pieceAdvantage, avgDistanceFromCentre, triangle_structures
 from irrationalAgents.helpers.evaluation import dijkstraEvalScore
 import copy
 
@@ -12,14 +12,16 @@ def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer 
     # print("Depth = " + str(depth))
     # print("Minimaxing move: Player " + str(curPlayer) + " " + str(action))
     # print("State:")
-    # print(state._data)
+    # print_state(state._data)
+    # print("Degrees:")
+    # print_state(state.hex_degrees)
     
     # Check if victory has been achieved. If so, we don't need to keep making moves on this state.
-    # victory = 0
-    # if state.turns_taken >= (2 * state.n - 1) and action is not None:
-    #     victory = check_winner(state, action, curPlayer, ourPlayer)
-    #     if victory == 1 or victory == -1:
-    #         return [action[1], action[2], victory]
+    victory = 0
+    if state.turns_taken >= (2 * state.n - 1) and action is not None:
+        victory = check_winner(state, action, curPlayer, ourPlayer)
+        if victory == 1 or victory == -1:
+            return [action[1], action[2], victory]
 
     # If we have hit max depth for minimax (and there's no victory), it's time to evaluate the board state.
     if depth == MAX_DEPTH:
@@ -30,7 +32,7 @@ def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer 
         # Best outcome starts out at -inf w.r.t our player
         best = [-1, -1, -Infinity]
         
-        for hex in empty_hexes(state):
+        for hex in hexes_by_involvement(state):
             # place piece in hex, then run minimax on the resulting state
             x, y = hex[0], hex[1]
             action = ("PLACE", x, y)
@@ -54,7 +56,7 @@ def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer 
     else:
         # Best outcome starts at inf w.r.t our player
         best = [-1, -1, Infinity]
-        for hex in empty_hexes(state):
+        for hex in hexes_by_involvement(state):
             x, y = hex[0], hex[1]
             action = ("PLACE", x, y)
             move = state.handle_action(action, _TOKEN_MAP_OUT[curPlayer])
@@ -79,7 +81,7 @@ def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer 
     # print(f"The best move for {curPlayer} is {str(best)}")
     return best
 
-def check_winner(state, action, curPlayer: int) -> int:
+def check_winner(state, action, curPlayer: int, ourPlayer: int) -> int:
     '''
     Checks if victory has been achieved. 
     Returns -1 if loss, 0 if no victory, 1 if victory, w.r.t ourPlayer.
@@ -93,8 +95,8 @@ def check_winner(state, action, curPlayer: int) -> int:
     axis_vals = [coord[axis] for coord in reachable]
     
     if min(axis_vals) == 0 and max(axis_vals) == state.n - 1:
-        # we have a win for curPlayer!
-        return 1
+        # we have a win for curPlayer! figure out if that's a win for our player or a loss
+        return 1 if curPlayer == ourPlayer else -1
     
     return 0
 
@@ -108,22 +110,25 @@ def empty_hexes(state):
             for j in range(0, state.n):
                     if state._data[i][j] == 0:
                         empty_hexes.append((i, j))
+    return empty_hexes
 
-    return sorted(empty_hexes, key=lambda x: manhatten_distance(x, (state.n//2, state.n//2)), reverse=True )
-
+def hexes_by_involvement(state):
+    '''
+    Function that returns a list of empty hexes on the board, in descending order of their degree
+    '''
+    return sorted(empty_hexes(state), key = lambda x: state.hex_degrees[x[0]][x[1]], reverse=True)
 
 def evaluate(state, player: int, action: tuple):
     '''
     Evaluation or utility function. 
     Returns a value for the 'desirability' of a board state based upon an evaluation of certain features.
     '''
-
     dijkstraScore = dijkstraEvalScore(player, state)
     avgDistanceScore = -1 * avgDistanceFromCentre(state, player)
     pieceAdvantageScore = pieceAdvantage(state, player)
     triangeStructureScore = triangle_structures(state, player) / 3
     
-    score = 3 * dijkstraScore + avgDistanceScore + 2 * pieceAdvantageScore + triangeStructureScore
+    score = 2 * dijkstraScore + avgDistanceScore + 2 * pieceAdvantageScore + triangeStructureScore
 
     # print("EVAL! Action: " + str(action) + ". with respect to player " + str(player) + ". Score = " + str(np.arctan(score)/(np.pi/2)) + ".")
     # print(f"Dijkstra: {dijkstraScore}, Distance: {avgDistanceScore}, Piece Advantage: {pieceAdvantageScore}, Triangle Structure: {triangeStructureScore}")

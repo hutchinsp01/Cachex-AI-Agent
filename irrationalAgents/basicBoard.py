@@ -7,6 +7,7 @@ Code borrowed from 'referee' package written for COMP30024 Project B at The Univ
 
 from queue import Queue
 from numpy import zeros, array, roll, vectorize
+from collections import defaultdict as dd
 
 # Utility function to add two coord tuples
 _ADD = lambda a, b: (a[0] + b[0], a[1] + b[1])
@@ -59,6 +60,12 @@ class Board:
         # initialise number of turns taken.
         self.turns_taken = 0
 
+        # initialise list of occupied hexes
+        # self.occupied_hexes = []
+
+        #initialise array of hex degrees
+        self.hex_degrees = zeros((n, n), dtype=int)
+
     def __getitem__(self, coord):
         """
         Get the token at given board coord (r, q).
@@ -87,7 +94,19 @@ class Board:
         self.turns_taken += 1
         swap_player_tokens = vectorize(lambda t: _SWAP_PLAYER[t])
         self._data = swap_player_tokens(self._data.transpose())
+        
+        # update hex degrees - inefficient but should only happen once :)
+        for i in range(self.n):
+            for j in range(self.n):
+                 if self._data[i][j] != 0:
+                     self.change_neighbour_degrees((i,j), 1)
+                     self.change_neighbour_degrees((j,i), -1)
 
+    def change_neighbour_degrees(self, coord: tuple, amount: int):
+        for neighbour in self._coord_neighbours(coord):
+            self.hex_degrees[neighbour[0]][neighbour[1]] += amount
+
+    
     def place(self, token, coord):
         """
         Place a token on the board and apply captures if they exist.
@@ -95,6 +114,7 @@ class Board:
         """
         self.turns_taken += 1
         self[coord] = token
+        self.change_neighbour_degrees((coord), 1)
         return self._apply_captures(coord)
 
     def connected_coords(self, start_coord):
@@ -156,6 +176,7 @@ class Board:
         # Remove any captured tokens
         for coord in captured:
             self[coord] = None
+            self.change_neighbour_degrees(coord, -1)
 
         return list(captured)
 
@@ -191,9 +212,11 @@ class Board:
             self.turns_taken -= 1
         else:
             self._data[move[1][0], move[1][1]] = 0
+            self.change_neighbour_degrees((move[1][0], move[1][1]), -1)
             opponent = _SWAP_PLAYER[_TOKEN_MAP_IN[move[0]]]
             for captured in move[2]:
                 self._data[captured[0]][captured[1]] = opponent
+                self.change_neighbour_degrees((captured[0], captured[1]), 1)
 
         # decrement turn count
         self.turns_taken -= 1
