@@ -1,6 +1,7 @@
 from numpy import Infinity
+from irrationalAgents.helpers.evaluation import getDijkstraDistance
 from irrationalAgents.helpers.minimax import minimax
-from irrationalAgents.basicBoard import _TOKEN_MAP_IN, Board
+from irrationalAgents.basicBoard import _TOKEN_MAP_IN, Board, _SWAP_PLAYER
 import copy
 
 class Player:
@@ -13,8 +14,8 @@ class Player:
         play as Red, or the string "blue" if your player will play
         as Blue.
         """
-        self.player = player
-        self.playerInt = _TOKEN_MAP_IN[self.player]
+        self.playerColour = player
+        self.player = _TOKEN_MAP_IN[self.playerColour]
         self.board = Board(n)
 
 
@@ -23,7 +24,9 @@ class Player:
         Called at the beginning of your turn. Based on the current state
         of the game, select an action to play.
         """
-        position = minimax(self.board, 0, None, -Infinity, +Infinity, self.playerInt, self.playerInt)
+        opponent = _SWAP_PLAYER[self.player]
+        shortestPaths  = (getDijkstraDistance(self.player, self.board), getDijkstraDistance(opponent, self.board))
+        position = minimax(self.board, 0, None, -Infinity, +Infinity, self.player, self.player, shortestPaths)
         return ("PLACE", position[0], position[1]) 
 
 
