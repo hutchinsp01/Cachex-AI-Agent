@@ -36,13 +36,13 @@ def dijkstraEvalScore(playerColor: int, board: Board) -> int:
     Returns eval score based on difference between shortest path completion for opposition and shortest path completion for player
     '''
     # print("Player color = " + str(playerColor))
-    # oppositionColor = 1 if playerColor == 2 else 2
+    oppositionColor = 1 if playerColor == 2 else 2
     # return getDijkstraDistance(oppositionColor, board) - getDijkstraDistance(playerColor, board)
     # score = getDijkstraDistance(playerColor, board)
     # if score == 0:
     #     return np.Inf
     try:
-        return getDijkstraDistance(playerColor, board)
+        return getDijkstraDistance(oppositionColor, board) - getDijkstraDistance(playerColor, board)
     except:
         return 10000
 

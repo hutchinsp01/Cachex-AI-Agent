@@ -11,17 +11,20 @@ def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer 
     # Print calls to help me figure out how it was working :)
     # print("Depth = " + str(depth))
     # print("Minimaxing move: Player " + str(curPlayer) + " " + str(action))
-    print("State:")
-    print_state(state._data)
-    print("Occupied hexes: " + str(state.occupied_hexes))
+    # print("State:")
+    # print_state(state._data)
+    # print("Occupied hexes: " + str(state.occupied_hexes))
+    # print("Turns: " + str(state.turns_taken))
     # print("Degrees:")
     # print_state(state.hex_degrees)
     
     # Check if victory has been achieved. If so, we don't need to keep making moves on this state.
     victory = 0
     if state.turns_taken >= (2 * state.n - 1) and action is not None:
+        # print(f"Assessing victory for player {curPlayer}  wrt {ourPlayer}")
         victory = check_winner(state, action, curPlayer, ourPlayer)
         if victory == 1 or victory == -1:
+            # print(f"VICTORY: {victory}")
             return [action[1], action[2], victory]
 
     # If we have hit max depth for minimax (and there's no victory), it's time to evaluate the board state.
@@ -88,16 +91,20 @@ def check_winner(state, action, curPlayer: int, ourPlayer: int) -> int:
     Returns -1 if loss, 0 if no victory, 1 if victory, w.r.t ourPlayer.
     Code borrowed from game.py in referee module provided by COMP30024 tutors.
     '''
+    # We are evaluating victory relative to the player that just played, rather than the player whose turn it is
+    prevPlayer = 1 if curPlayer == 2 else 2
+    
     # axis is 0 for red, 1 for blue
-    axis = 0 if curPlayer == 1 else 1
+    axis = 0 if prevPlayer == 1 else 1
 
     _, r, q = action
     reachable = state.connected_coords((r, q))
     axis_vals = [coord[axis] for coord in reachable]
-    
+    # print(f"Checking winner: move = {(r, q)} by player {prevPlayer}")
+    # print(f"Axis values = {axis_vals}")
     if min(axis_vals) == 0 and max(axis_vals) == state.n - 1:
         # we have a win for curPlayer! figure out if that's a win for our player or a loss
-        return 1 if curPlayer == ourPlayer else -1
+        return 1 if prevPlayer == ourPlayer else -1
     
     return 0
 
@@ -129,12 +136,12 @@ def evaluate(state, player: int, action: tuple):
     pieceAdvantageScore = pieceAdvantage(state, player)
     triangeStructureScore = triangle_structures(state, player, action)
     
-    score = 2 * dijkstraScore + avgDistanceScore + 2 * pieceAdvantageScore + triangeStructureScore
+    score = 2 * dijkstraScore + 2 * pieceAdvantageScore 
 
-    print("EVAL! Action: " + str(action) + ". with respect to player " + str(player) + ". Score = " + str(np.arctan(score)/(np.pi/2)) + ".")
-    print(f"Dijkstra: {dijkstraScore}, Distance: {avgDistanceScore}, Piece Advantage: {pieceAdvantageScore}, Triangle Structure: {triangeStructureScore}")
-    print("State:")
-    print_state(state._data)
+    # print("EVAL! Action: " + str(action) + ". with respect to player " + str(player) + ". Score = " + str(np.arctan(score)/(np.pi/2)) + ".")
+    # print(f"Dijkstra: {dijkstraScore}, Distance: {avgDistanceScore}, Piece Advantage: {pieceAdvantageScore}, Triangle Structure: {triangeStructureScore}")
+    # print("State:")
+    # print_state(state._data)
     
     # Normalise the score so that it lies in the range [-1, 1]. Note that the extremes are only possible in the case of victory or loss.
     return np.arctan(score)/(np.pi/2)
