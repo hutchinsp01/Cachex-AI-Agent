@@ -12,7 +12,20 @@ def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer 
     # print("Depth = " + str(depth))
     # print("Minimaxing move: Player " + str(curPlayer) + " " + str(action))
     # print("State:")
-    # print(state._data)
+    # print_state(state._data)
+    # print("Occupied hexes: " + str(state.occupied_hexes))
+    # print("Turns: " + str(state.turns_taken))
+    # print("Degrees:")
+    # print_state(state.hex_degrees)
+    
+    # Check if victory has been achieved. If so, we don't need to keep making moves on this state.
+    victory = 0
+    if state.turns_taken >= (2 * state.n - 1) and action is not None:
+        # print(f"Assessing victory for player {curPlayer}  wrt {ourPlayer}")
+        victory = check_winner(state, action, curPlayer, ourPlayer)
+        if victory == 1 or victory == -1:
+            # print(f"VICTORY: {victory}")
+            return [action[1], action[2], victory]
 
     emptyHexes = empty_hexes(state)
     numHexes = len(emptyHexes)
@@ -36,7 +49,7 @@ def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer 
         # Best outcome starts out at -inf w.r.t our player
         best = [-1, -1, -Infinity]
         
-        for hex in emptyHexes:
+        for hex in hexes_by_involvement(state):
             # place piece in hex, then run minimax on the resulting state
             x, y = hex[0], hex[1]
             action = ("PLACE", x, y)
@@ -60,7 +73,7 @@ def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer 
     else:
         # Best outcome starts at inf w.r.t our player
         best = [-1, -1, Infinity]
-        for hex in emptyHexes:
+        for hex in hexes_by_involvement(state):
             x, y = hex[0], hex[1]
             action = ("PLACE", x, y)
             move = state.handle_action(action, _TOKEN_MAP_OUT[curPlayer])
@@ -85,22 +98,26 @@ def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer 
     # print(f"The best move for {curPlayer} is {str(best)}")
     return best
 
-def check_winner(state, action, curPlayer: int) -> int:
+def check_winner(state, action, curPlayer: int, ourPlayer: int) -> int:
     '''
     Checks if victory has been achieved. 
     Returns -1 if loss, 0 if no victory, 1 if victory, w.r.t ourPlayer.
     Code borrowed from game.py in referee module provided by COMP30024 tutors.
     '''
+    # We are evaluating victory relative to the player that just played, rather than the player whose turn it is
+    prevPlayer = 1 if curPlayer == 2 else 2
+    
     # axis is 0 for red, 1 for blue
-    axis = 0 if curPlayer == 1 else 1
+    axis = 0 if prevPlayer == 1 else 1
 
     _, r, q = action
     reachable = state.connected_coords((r, q))
     axis_vals = [coord[axis] for coord in reachable]
-    
+    # print(f"Checking winner: move = {(r, q)} by player {prevPlayer}")
+    # print(f"Axis values = {axis_vals}")
     if min(axis_vals) == 0 and max(axis_vals) == state.n - 1:
-        # we have a win for curPlayer!
-        return 1
+        # we have a win for curPlayer! figure out if that's a win for our player or a loss
+        return 1 if prevPlayer == ourPlayer else -1
     
     return 0
 
@@ -114,9 +131,13 @@ def empty_hexes(state):
             for j in range(0, state.n):
                     if state._data[i][j] == 0:
                         empty_hexes.append((i, j))
+    return empty_hexes
 
-    return sorted(empty_hexes, key=lambda x: manhatten_distance(x, (state.n//2, state.n//2)))
-
+def hexes_by_involvement(state):
+    '''
+    Function that returns a list of empty hexes on the board, in descending order of their degree
+    '''
+    return sorted(empty_hexes(state), key = lambda x: state.hex_degrees[x[0]][x[1]], reverse=True)
 
 def evaluate(state, player: int, action: tuple, shortestPaths: tuple):
     '''
