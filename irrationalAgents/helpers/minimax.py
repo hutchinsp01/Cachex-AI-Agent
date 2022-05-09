@@ -11,8 +11,9 @@ def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer 
     # Print calls to help me figure out how it was working :)
     # print("Depth = " + str(depth))
     # print("Minimaxing move: Player " + str(curPlayer) + " " + str(action))
-    # print("State:")
-    # print_state(state._data)
+    print("State:")
+    print_state(state._data)
+    print("Occupied hexes: " + str(state.occupied_hexes))
     # print("Degrees:")
     # print_state(state.hex_degrees)
     
@@ -126,14 +127,14 @@ def evaluate(state, player: int, action: tuple):
     dijkstraScore = dijkstraEvalScore(player, state)
     avgDistanceScore = -1 * avgDistanceFromCentre(state, player)
     pieceAdvantageScore = pieceAdvantage(state, player)
-    triangeStructureScore = triangle_structures(state, player) / 3
+    triangeStructureScore = triangle_structures(state, player, action)
     
     score = 2 * dijkstraScore + avgDistanceScore + 2 * pieceAdvantageScore + triangeStructureScore
 
-    # print("EVAL! Action: " + str(action) + ". with respect to player " + str(player) + ". Score = " + str(np.arctan(score)/(np.pi/2)) + ".")
-    # print(f"Dijkstra: {dijkstraScore}, Distance: {avgDistanceScore}, Piece Advantage: {pieceAdvantageScore}, Triangle Structure: {triangeStructureScore}")
-    # print("State:")
-    # print_state(state._data)
+    print("EVAL! Action: " + str(action) + ". with respect to player " + str(player) + ". Score = " + str(np.arctan(score)/(np.pi/2)) + ".")
+    print(f"Dijkstra: {dijkstraScore}, Distance: {avgDistanceScore}, Piece Advantage: {pieceAdvantageScore}, Triangle Structure: {triangeStructureScore}")
+    print("State:")
+    print_state(state._data)
     
     # Normalise the score so that it lies in the range [-1, 1]. Note that the extremes are only possible in the case of victory or loss.
     return np.arctan(score)/(np.pi/2)
