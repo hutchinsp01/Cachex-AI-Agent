@@ -1,7 +1,8 @@
+from time import process_time
+import time
 from numpy import Infinity
 import numpy as np
 from irrationalAgents.basicBoard import _SWAP_PLAYER, _TOKEN_MAP_OUT
-from irrationalAgents.constants import DEPTH1, DEPTH2, DEPTH3, DEPTH4
 from irrationalAgents.helpers.pieces import manhatten_distance, pieceAdvantage, avgDistanceFromCentre, triangle_structures
 from irrationalAgents.helpers.evaluation import dijkstraEvalScore
 import copy
@@ -26,6 +27,9 @@ def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer 
         if victory == 1 or victory == -1:
             # print(f"VICTORY: {victory}")
             return [action[1], action[2], victory]
+
+    if ((state.greedyLimit - (state.totalTime + (time.process_time() - state.moveStart))) <= 0 ):
+        maxDepth = 1
 
     # If we have hit max depth for minimax (and there's no victory), it's time to evaluate the board state.
     if depth >= maxDepth:

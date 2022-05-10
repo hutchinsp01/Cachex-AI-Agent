@@ -1,8 +1,8 @@
 from numpy import Infinity
-from irrationalAgents.helpers.evaluation import getDijkstraDistance
-from irrationalAgents.helpers.minimax import minimax
-from irrationalAgents.basicBoard import _TOKEN_MAP_IN, Board, _SWAP_PLAYER
-import copy
+from irrationalAgents.constants import DEPTH1, DEPTH2, DEPTH3, DEPTH4
+from irrationalAgents.helpers.minimax import empty_hexes, minimax
+from irrationalAgents.basicBoard import _TOKEN_MAP_IN, Board
+import time
 
 class Player:
     def __init__(self, player, n):
@@ -24,26 +24,32 @@ class Player:
         Called at the beginning of your turn. Based on the current state
         of the game, select an action to play.
         """
-        # emptyHexes = empty_hexes(state)
-        # numHexes = len(emptyHexes)
+        self.board.moveStart = time.process_time()
 
-        maxDepth = 4
-        # if numHexes > DEPTH4:
-        #     maxDepth = 4
-        # if numHexes > DEPTH3:
-        #     maxDepth = 3
-        # if numHexes > DEPTH2:
-        #     maxDepth = 2
-        # if numHexes > DEPTH1:
-        #     maxDepth = 1
-        if self.board.turns_taken == 0:
+        if ((self.board.randomLimit - (self.board.totalTime + (time.process_time() - self.board.moveStart))) <= 0 ):
+            position = empty_hexes(self.board)[0]
+        elif self.board.turns_taken == 0:
             position = (0,0)
         elif self.board.turns_taken == 1:
             return ("STEAL", )
         else:
-            # opponent = _SWAP_PLAYER[self.player]
-            # shortestPaths  = (getDijkstraDistance(self.player, self.board), getDijkstraDistance(opponent, self.board))
+            numHexes = self.board.n * self.board.n - len(self.board.occupied_hexes)
+
+            maxDepth = 5
+            if numHexes > DEPTH4:
+                maxDepth = 4
+            if numHexes > DEPTH3:
+                maxDepth = 3
+            if numHexes > DEPTH2:
+                maxDepth = 2
+            if numHexes > DEPTH1:
+                maxDepth = 1
+
+
             position = minimax(self.board, 0, None, -Infinity, +Infinity, self.player, self.player, maxDepth)
+
+        self.board.totalTime = self.board.totalTime + (time.process_time() - self.board.moveStart)
+
         return ("PLACE", position[0], position[1]) 
 
 
