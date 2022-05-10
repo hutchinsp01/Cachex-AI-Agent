@@ -1,9 +1,9 @@
 from numpy import Infinity
 import numpy as np
-from irrationalAgents.basicBoard import _SWAP_PLAYER, _TOKEN_MAP_OUT
-from irrationalAgents.constants import DEPTH1, DEPTH2, DEPTH3, DEPTH4
-from irrationalAgents.helpers.pieces import manhatten_distance, pieceAdvantage, avgDistanceFromCentre, triangle_structures
-from irrationalAgents.helpers.evaluation import dijkstraEvalScore
+from irrationalAgents1.basicBoard import _SWAP_PLAYER, _TOKEN_MAP_OUT
+from irrationalAgents1.constants import DEPTH1, DEPTH2, DEPTH3, DEPTH4
+from irrationalAgents1.helpers.pieces import manhatten_distance, pieceAdvantage, avgDistanceFromCentre, triangle_structures
+from irrationalAgents1.helpers.evaluation import dijkstraEvalScore
 import copy
 
 
@@ -36,7 +36,7 @@ def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer 
         # Best outcome starts out at -inf w.r.t our player
         best = [-1, -1, -Infinity]
         
-        for hex in hexes_by_involvement(state):
+        for hex in empty_hexes(state):
             # place piece in hex, then run minimax on the resulting state
             x, y = hex[0], hex[1]
             action = ("PLACE", x, y)
@@ -49,15 +49,12 @@ def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer 
             # if eval score surpasses the current best, we have a new best move
             score[0], score[1] = x, y
 
-            # quick return - finish the game
-            if score[2] == 1:
-                return score
-
             if score[2] > best[2]:
                 best = score
 
             # if our maximizing player hits a score that is greater than what the minimizing player will consider, break. This board state is now irrelevant and the rest of the possible moves are pruned.
             if best[2] >= (b):
+                print("Prune random")
                 break
             
             # update alpha so moves further down the minimax tree can use it as a reference
@@ -65,22 +62,19 @@ def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer 
     else:
         # Best outcome starts at inf w.r.t our player
         best = [-1, -1, Infinity]
-        for hex in hexes_by_involvement(state):
+        for hex in empty_hexes(state):
             x, y = hex[0], hex[1]
             action = ("PLACE", x, y)
             move = state.handle_action(action, _TOKEN_MAP_OUT[curPlayer])
             score = minimax(state, depth + 1, action, a, b, _SWAP_PLAYER[curPlayer], ourPlayer, maxDepth)
             state.undo_move(move)
             score[0], score[1] = x, y
-
-            # quick return - finish the game
-            if score[2] == -1:
-                return score
             
             if score[2] < best[2]:
                 best = score
             
             if best[2] <= (a) :
+                print("Prune random")
                 break
             
             b = min(b, best[2])
@@ -135,25 +129,14 @@ def hexes_by_involvement(state):
     '''
     return sorted(empty_hexes(state), key = lambda x: state.hex_degrees[x[0]][x[1]], reverse=True)
 
-def hexes_from_centroid(state):
+def only_involved_hexes(state):
+    involved_hexes = []
+    for i in range(state.n):
+        for j in range(state.n):
+            if state._data[i][j] == 0 and state.hex_degrees[i][j] > 0:
+                involved_hexes.append((i, j))
     
-    hexList = sorted(empty_hexes(state), key = lambda x: manhatten_distance(x, centroid(state)))
-    # print_state(state._data)
-    # print(hexList)
-    return hexList
-
-def centroid(state): 
-    numCoords = len(state.occupied_hexes)
-    if numCoords == 0:
-        return (0,0)
-    xsum = 0
-    ysum = 0
-    for coord in state.occupied_hexes:
-        xsum += coord[0]
-        ysum += coord[1]
-    
-    
-    return (xsum/numCoords, ysum/numCoords)
+    return sorted(involved_hexes, key = lambda x: state.hex_degrees[x[0]][x[1]], reverse=True)
 
 def evaluate(state, player: int):
     '''
@@ -169,16 +152,16 @@ def evaluate(state, player: int):
     # if shortestPaths[0] > 2 or shortestPaths[1] > 2:
     #     dijkstraScore *= 10
     
-    score = 2 * dijkstraScore
+    score = 2 * dijkstraScore + pieceAdvantageScore
     # score = dijkstraScore
 
-    print("EVAL! with respect to player " + str(player) + ". Score = " + str(np.arctan(score)/(np.pi/2)) + ".")
-    print(f"Dijkstra: {dijkstraScore}, Piece Advantage: {pieceAdvantageScore}")
-    print("State:")
-    print_state(state._data)
+    # print("EVAL! Action: " + str(action) + ". with respect to player " + str(player) + ". Score = " + str(np.arctan(score)/(np.pi/2)) + ".")
+    # print(f"Dijkstra: {dijkstraScore}, Distance: {avgDistanceScore}, Piece Advantage: {pieceAdvantageScore}, Triangle Structure: {triangeStructureScore}")
+    # print("State:")
+    # print_state(state._data)
     
     # Normalise the score so that it lies in the range [-1, 1]. Note that the extremes are only possible in the case of victory or loss.
-    return np.arctan(score)/(np.pi/2)
+    return np.tanh(score)
 
 def print_state(data):
     '''

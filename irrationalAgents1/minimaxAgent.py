@@ -1,7 +1,7 @@
 from numpy import Infinity
-from irrationalAgents.helpers.evaluation import getDijkstraDistance
-from irrationalAgents.helpers.minimax import minimax
-from irrationalAgents.basicBoard import _TOKEN_MAP_IN, Board, _SWAP_PLAYER
+from irrationalAgents1.helpers.evaluation import getDijkstraDistance
+from irrationalAgents1.helpers.minimax import minimax
+from irrationalAgents1.basicBoard import _TOKEN_MAP_IN, Board, _SWAP_PLAYER
 import copy
 
 class Player:
@@ -27,7 +27,7 @@ class Player:
         # emptyHexes = empty_hexes(state)
         # numHexes = len(emptyHexes)
 
-        maxDepth = 1
+        maxDepth = 2
         # if numHexes > DEPTH4:
         #     maxDepth = 4
         # if numHexes > DEPTH3:
