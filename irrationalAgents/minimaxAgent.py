@@ -1,6 +1,6 @@
 from numpy import Infinity
 from irrationalAgents.constants import DEPTH1, DEPTH2, DEPTH3, DEPTH4
-from irrationalAgents.helpers.minimax import empty_hexes, minimax
+from irrationalAgents.helpers.minimax import empty_hexes, hexes_by_involvement, minimax
 from irrationalAgents.helpers.pieces import opponentEdge
 from irrationalAgents.basicBoard import _TOKEN_MAP_IN, Board
 import time
@@ -28,7 +28,7 @@ class Player:
         self.board.moveStart = time.process_time()
 
         if ((self.board.randomLimit - (self.board.totalTime)) <= 0 ):
-            position = empty_hexes(self.board)[0]
+            position = hexes_by_involvement(self.board)[0]
         elif self.board.turns_taken == 0:
             position = (0,0)
         elif self.board.turns_taken == 1:
@@ -37,14 +37,14 @@ class Player:
             numHexes = self.board.n * self.board.n - len(self.board.occupied_hexes)
 
             maxDepth = 5
-            # if numHexes > DEPTH4:
-            #     maxDepth = 4
-            # if numHexes > DEPTH3:
-            #     maxDepth = 3
-            # if numHexes > DEPTH2:
-            #     maxDepth = 2
-            # if numHexes > DEPTH1:
-            #     maxDepth = 1
+            if numHexes > DEPTH4:
+                maxDepth = 4
+            if numHexes > DEPTH3:
+                maxDepth = 3
+            if numHexes > DEPTH2:
+                maxDepth = 2
+            if numHexes > DEPTH1:
+                maxDepth = 1
 
 
             position = minimax(self.board, 0, None, -Infinity, +Infinity, self.player, self.player, maxDepth)

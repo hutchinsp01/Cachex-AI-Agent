@@ -66,8 +66,8 @@ class Board:
         #initialise set of occupied hexes
         self.occupied_hexes = set()
         self.timeLimit = n*n
-        self.greedyLimit = 15
-        self.randomLimit = 20
+        self.greedyLimit = n*n - n/2
+        self.randomLimit = n*n - 1
         self.totalTime = 0
         self.moveStart = 0
 
