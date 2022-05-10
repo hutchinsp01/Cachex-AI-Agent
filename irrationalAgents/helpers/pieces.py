@@ -45,7 +45,7 @@ def manhatten_distance(cur: tuple, goal: tuple):
     
     return max(abs(dx), abs(dy))
 
-def triangle_structures(state: Board, player: int, action: tuple) -> int:
+def triangle_structures(state: Board, player: int) -> int:
     '''
     Evaluates the number of triangle structures present for a player.
     These are desirable as they are less susceptible to capture.

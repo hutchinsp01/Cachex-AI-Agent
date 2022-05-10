@@ -31,38 +31,36 @@ import sys, json
 
 #     return Board(size, board)
 
-def dijkstraEvalScore(playerColor: int, board: Board, shortestPaths: tuple) -> int:
+def dijkstraEvalScore(playerColor: int, board: Board) -> int:
     '''
     Returns eval score based on difference between shortest path completion for opposition and shortest path completion for player
     '''
     # print("Player color = " + str(playerColor))
     oppositionColor = 1 if playerColor == 2 else 2
     n = board.n
-    ourDistance = None
-    opponentDistance = None
+    # ourDistance = None
+    # opponentDistance = None
 
-    if shortestPaths[0] < n/2:
-        ourDistance = getDijkstraDistance(playerColor, board)
-    if shortestPaths[1] < n/2:
-        opponentDistance = getDijkstraDistance(oppositionColor, board)
+    ourDistance = getDijkstraDistance(playerColor, board)
+    opponentDistance = getDijkstraDistance(oppositionColor, board)
 
-    if ourDistance == None and opponentDistance == None:
-        return 0
+    # if ourDistance == None and opponentDistance == None:
+    #     return 0
 
-    if ourDistance == None and opponentDistance != None:
-        return opponentDistance
+    # if ourDistance == None and opponentDistance != None:
+    #     return opponentDistance
 
-    if ourDistance == 0:
-        return np.inf
+    # if ourDistance == 0:
+    #     return np.inf
     
-    if ourDistance != None and opponentDistance == None:
-        try:
-            return 1/ourDistance
-        except:
-            return np.inf
+    # if ourDistance != None and opponentDistance == None:
+    #     try:
+    #         return 1/ourDistance
+    #     except:
+    #         return np.inf
     
-    else:
-        return opponentDistance - ourDistance
+    # else:
+    return opponentDistance - ourDistance
 
     
 
