@@ -27,7 +27,7 @@ class Player:
         """
         self.board.moveStart = time.process_time()
 
-        if ((self.board.randomLimit - (self.board.totalTime + (time.process_time() - self.board.moveStart))) <= 0 ):
+        if ((self.board.randomLimit - (self.board.totalTime)) <= 0 ):
             position = empty_hexes(self.board)[0]
         elif self.board.turns_taken == 0:
             position = (0,0)
@@ -50,8 +50,6 @@ class Player:
             position = minimax(self.board, 0, None, -Infinity, +Infinity, self.player, self.player, maxDepth)
 
         self.board.totalTime = self.board.totalTime + (time.process_time() - self.board.moveStart)
-
-        print(f"{self.player} {opponentEdge(self.board, self.playerColour)}")
 
         return ("PLACE", position[0], position[1]) 
 
