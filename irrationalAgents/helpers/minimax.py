@@ -1,6 +1,6 @@
 from time import process_time
 import time
-from numpy import Infinity
+from numpy import Inf, Infinity
 import numpy as np
 from irrationalAgents.basicBoard import _SWAP_PLAYER, _TOKEN_MAP_OUT
 from irrationalAgents.helpers.pieces import manhatten_distance, opponentEdge, pieceAdvantage, avgDistanceFromCentre, triangle_structures
@@ -25,8 +25,7 @@ def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer 
         # print(f"Assessing victory for player {curPlayer}  wrt {ourPlayer}")
         victory = check_winner(state, action, curPlayer, ourPlayer)
         if victory == 1 or victory == -1:
-            # print(f"VICTORY: {victory}")
-            return [action[1], action[2], victory]
+            return [action[1], action[2], Inf * victory]
 
     if ((state.greedyLimit - (state.totalTime + (time.process_time() - state.moveStart))) <= 0 ):
         maxDepth = 1
@@ -144,7 +143,7 @@ def evaluate(state, player: int):
     # if shortestPaths[0] > 2 or shortestPaths[1] > 2:
     #     dijkstraScore *= 10
     
-    score = 2 * dijkstraScore + pieceAdvantageScore + opponentEdgeScore
+    score = (2 * dijkstraScore + pieceAdvantageScore + opponentEdgeScore) 
     # score = dijkstraScore
 
     # print("EVAL! Action: " + str(action) + ". with respect to player " + str(player) + ". Score = " + str(np.arctan(score)/(np.pi/2)) + ".")
@@ -153,7 +152,7 @@ def evaluate(state, player: int):
     # print_state(state._data)
     
     # Normalise the score so that it lies in the range [-1, 1]. Note that the extremes are only possible in the case of victory or loss.
-    return np.tanh(score)
+    return score
 
 def print_state(data):
     '''
