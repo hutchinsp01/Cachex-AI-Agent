@@ -7,7 +7,7 @@ from irrationalAgents.helpers.evaluation import dijkstraEvalScore
 import copy
 
 
-def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer : int, ourPlayer: int, shortestPaths : tuple) -> float:
+def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer : int, ourPlayer: int, maxDepth: int) -> float:
     # Print calls to help me figure out how it was working :)
     # print("Depth = " + str(depth))
     # print("Minimaxing move: Player " + str(curPlayer) + " " + str(action))
@@ -27,22 +27,9 @@ def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer 
             # print(f"VICTORY: {victory}")
             return [action[1], action[2], victory]
 
-    emptyHexes = empty_hexes(state)
-    numHexes = len(emptyHexes)
-
-    maxDepth = 5
-    if numHexes > DEPTH4:
-        maxDepth = 4
-    if numHexes > DEPTH3:
-        maxDepth = 3
-    if numHexes > DEPTH2:
-        maxDepth = 2
-    if numHexes > DEPTH1:
-        maxDepth = 1
-
     # If we have hit max depth for minimax (and there's no victory), it's time to evaluate the board state.
     if depth >= maxDepth:
-        return [-1, -1, evaluate(state, ourPlayer, action, shortestPaths)]
+        return [-1, -1, evaluate(state, ourPlayer)]
 
     # If we haven't hit max depth and victory hasn't been achieved, time to explore deeper.
     if curPlayer == ourPlayer:
@@ -54,7 +41,7 @@ def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer 
             x, y = hex[0], hex[1]
             action = ("PLACE", x, y)
             move = state.handle_action(action, _TOKEN_MAP_OUT[curPlayer])
-            score = minimax(state, depth + 1, action, a, b, _SWAP_PLAYER[curPlayer], ourPlayer, shortestPaths)
+            score = minimax(state, depth + 1, action, a, b, _SWAP_PLAYER[curPlayer], ourPlayer, maxDepth)
             
             # revert the action, so that a new one can be performed for the next hex
             state.undo_move(move)
@@ -77,7 +64,7 @@ def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer 
             x, y = hex[0], hex[1]
             action = ("PLACE", x, y)
             move = state.handle_action(action, _TOKEN_MAP_OUT[curPlayer])
-            score = minimax(state, depth + 1, action, a, b, _SWAP_PLAYER[curPlayer], ourPlayer, shortestPaths)
+            score = minimax(state, depth + 1, action, a, b, _SWAP_PLAYER[curPlayer], ourPlayer, maxDepth)
             state.undo_move(move)
             score[0], score[1] = x, y
             
@@ -139,21 +126,21 @@ def hexes_by_involvement(state):
     '''
     return sorted(empty_hexes(state), key = lambda x: state.hex_degrees[x[0]][x[1]], reverse=True)
 
-def evaluate(state, player: int, action: tuple, shortestPaths: tuple):
+def evaluate(state, player: int):
     '''
     Evaluation or utility function. 
     Returns a value for the 'desirability' of a board state based upon an evaluation of certain features.
     '''
 
-    dijkstraScore = dijkstraEvalScore(player, state, shortestPaths)
-    avgDistanceScore = -1 * avgDistanceFromCentre(state, player)
+    dijkstraScore = dijkstraEvalScore(player, state)
+    # avgDistanceScore = -1 * avgDistanceFromCentre(state, player)
     pieceAdvantageScore = pieceAdvantage(state, player)
-    triangeStructureScore = triangle_structures(state, player) / 3
+    # triangeStructureScore = triangle_structures(state, player) / 3
 
-    if shortestPaths[0] > 2 or shortestPaths[1] > 2:
-        dijkstraScore *= 10
+    # if shortestPaths[0] > 2 or shortestPaths[1] > 2:
+    #     dijkstraScore *= 10
     
-    score = 5 * dijkstraScore + avgDistanceScore + 2 * pieceAdvantageScore + triangeStructureScore / 5
+    score = 2 * dijkstraScore + pieceAdvantageScore
     # score = dijkstraScore
 
     # print("EVAL! Action: " + str(action) + ". with respect to player " + str(player) + ". Score = " + str(np.arctan(score)/(np.pi/2)) + ".")
@@ -162,7 +149,7 @@ def evaluate(state, player: int, action: tuple, shortestPaths: tuple):
     # print_state(state._data)
     
     # Normalise the score so that it lies in the range [-1, 1]. Note that the extremes are only possible in the case of victory or loss.
-    return np.arctan(score)/(np.pi/2)
+    return np.tanh(score)
 
 def print_state(data):
     '''

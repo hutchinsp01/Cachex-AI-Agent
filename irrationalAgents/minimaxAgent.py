@@ -24,9 +24,26 @@ class Player:
         Called at the beginning of your turn. Based on the current state
         of the game, select an action to play.
         """
-        opponent = _SWAP_PLAYER[self.player]
-        shortestPaths  = (getDijkstraDistance(self.player, self.board), getDijkstraDistance(opponent, self.board))
-        position = minimax(self.board, 0, None, -Infinity, +Infinity, self.player, self.player, shortestPaths)
+        # emptyHexes = empty_hexes(state)
+        # numHexes = len(emptyHexes)
+
+        maxDepth = 4
+        # if numHexes > DEPTH4:
+        #     maxDepth = 4
+        # if numHexes > DEPTH3:
+        #     maxDepth = 3
+        # if numHexes > DEPTH2:
+        #     maxDepth = 2
+        # if numHexes > DEPTH1:
+        #     maxDepth = 1
+        if self.board.turns_taken == 0:
+            position = (0,0)
+        elif self.board.turns_taken == 1:
+            return ("STEAL", )
+        else:
+            # opponent = _SWAP_PLAYER[self.player]
+            # shortestPaths  = (getDijkstraDistance(self.player, self.board), getDijkstraDistance(opponent, self.board))
+            position = minimax(self.board, 0, None, -Infinity, +Infinity, self.player, self.player, maxDepth)
         return ("PLACE", position[0], position[1]) 
 
 
