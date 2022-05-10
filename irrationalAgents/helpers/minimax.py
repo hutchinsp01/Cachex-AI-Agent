@@ -3,7 +3,7 @@ import time
 from numpy import Infinity
 import numpy as np
 from irrationalAgents.basicBoard import _SWAP_PLAYER, _TOKEN_MAP_OUT
-from irrationalAgents.helpers.pieces import manhatten_distance, pieceAdvantage, avgDistanceFromCentre, triangle_structures
+from irrationalAgents.helpers.pieces import manhatten_distance, opponentEdge, pieceAdvantage, avgDistanceFromCentre, triangle_structures
 from irrationalAgents.helpers.evaluation import dijkstraEvalScore
 import copy
 
@@ -39,7 +39,6 @@ def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer 
     if curPlayer == ourPlayer:
         # Best outcome starts out at -inf w.r.t our player
         best = [-1, -1, -Infinity]
-        
         for hex in hexes_by_involvement(state):
             # place piece in hex, then run minimax on the resulting state
             x, y = hex[0], hex[1]
@@ -139,12 +138,13 @@ def evaluate(state, player: int):
     dijkstraScore = dijkstraEvalScore(player, state)
     # avgDistanceScore = -1 * avgDistanceFromCentre(state, player)
     pieceAdvantageScore = pieceAdvantage(state, player)
+    opponentEdgeScore = opponentEdge(state, player);
     # triangeStructureScore = triangle_structures(state, player) / 3
 
     # if shortestPaths[0] > 2 or shortestPaths[1] > 2:
     #     dijkstraScore *= 10
     
-    score = 2 * dijkstraScore + pieceAdvantageScore
+    score = 2 * dijkstraScore + pieceAdvantageScore + opponentEdgeScore
     # score = dijkstraScore
 
     # print("EVAL! Action: " + str(action) + ". with respect to player " + str(player) + ". Score = " + str(np.arctan(score)/(np.pi/2)) + ".")

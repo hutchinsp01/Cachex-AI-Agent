@@ -69,3 +69,16 @@ def triangle_structures(state: Board, player: int) -> int:
                 curNeighbour = nextNeighbour
                 
     return triangleCount
+
+def opponentEdge(state: Board, player: int) -> int:
+
+    blueScore = [state._data[x[0]][x[1]] for x in state.red_end].count(2)
+    blueScore += [state._data[x[0]][x[1]] for x in state.red_start].count(2)
+
+    redScore = [state._data[x[0]][x[1]] for x in state.blue_end].count(1)
+    redScore += [state._data[x[0]][x[1]] for x in state.blue_start].count(1)
+
+    if player == 1:
+        return redScore - blueScore
+
+    return blueScore - redScore

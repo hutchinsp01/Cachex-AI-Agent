@@ -1,6 +1,7 @@
 from numpy import Infinity
 from irrationalAgents.constants import DEPTH1, DEPTH2, DEPTH3, DEPTH4
 from irrationalAgents.helpers.minimax import empty_hexes, minimax
+from irrationalAgents.helpers.pieces import opponentEdge
 from irrationalAgents.basicBoard import _TOKEN_MAP_IN, Board
 import time
 
@@ -49,6 +50,8 @@ class Player:
             position = minimax(self.board, 0, None, -Infinity, +Infinity, self.player, self.player, maxDepth)
 
         self.board.totalTime = self.board.totalTime + (time.process_time() - self.board.moveStart)
+
+        print(f"{self.player} {opponentEdge(self.board, self.playerColour)}")
 
         return ("PLACE", position[0], position[1]) 
 
