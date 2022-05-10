@@ -44,7 +44,7 @@ def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer 
             action = ("PLACE", x, y)
             move = state.handle_action(action, _TOKEN_MAP_OUT[curPlayer])
             score = minimax(state, depth + 1, action, a, b, _SWAP_PLAYER[curPlayer], ourPlayer, maxDepth)
-            
+
             # revert the action, so that a new one can be performed for the next hex
             state.undo_move(move)
             
@@ -52,6 +52,9 @@ def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer 
             score[0], score[1] = x, y
             if score[2] > best[2]:
                 best = score
+
+            if ((state.randomLimit - (state.totalTime + (time.process_time() - state.moveStart))) <= 0 ):
+                return best
 
             # if our maximizing player hits a score that is greater than what the minimizing player will consider, break. This board state is now irrelevant and the rest of the possible moves are pruned.
             if best[2] >= (b):
@@ -72,6 +75,9 @@ def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer 
             
             if score[2] < best[2]:
                 best = score
+
+            if ((state.randomLimit - (state.totalTime + (time.process_time() - state.moveStart))) <= 0 ):
+                return best
             
             if best[2] <= (a) :
                 break
@@ -137,7 +143,7 @@ def evaluate(state, player: int):
     dijkstraScore = dijkstraEvalScore(player, state)
     # avgDistanceScore = -1 * avgDistanceFromCentre(state, player)
     pieceAdvantageScore = pieceAdvantage(state, player)
-    opponentEdgeScore = opponentEdge(state, player);
+    opponentEdgeScore = opponentEdge(state, player)
     # triangeStructureScore = triangle_structures(state, player) / 3
 
     # if shortestPaths[0] > 2 or shortestPaths[1] > 2:

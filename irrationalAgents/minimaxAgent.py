@@ -37,14 +37,14 @@ class Player:
             numHexes = self.board.n * self.board.n - len(self.board.occupied_hexes)
 
             maxDepth = 5
-            if numHexes > DEPTH4:
-                maxDepth = 4
-            if numHexes > DEPTH3:
-                maxDepth = 3
-            if numHexes > DEPTH2:
-                maxDepth = 2
-            if numHexes > DEPTH1:
-                maxDepth = 1
+            # if numHexes > DEPTH4:
+            #     maxDepth = 4
+            # if numHexes > DEPTH3:
+            #     maxDepth = 3
+            # if numHexes > DEPTH2:
+            #     maxDepth = 2
+            # if numHexes > DEPTH1:
+            #     maxDepth = 1
 
 
             position = minimax(self.board, 0, None, -Infinity, +Infinity, self.player, self.player, maxDepth)
