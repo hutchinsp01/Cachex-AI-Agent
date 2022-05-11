@@ -1,5 +1,5 @@
 from numpy import sign
-from irrationalAgents.basicBoard import _SWAP_PLAYER
+from irrationalAgents.basicBoard import _ADD, _CAPTURE_PATTERNS, _SWAP_PLAYER
 from irrationalAgents.basicBoard import Board
 from itertools import cycle
 import numpy as np
@@ -82,3 +82,27 @@ def opponentEdge(state: Board, player: int) -> int:
         return redScore - blueScore
 
     return blueScore - redScore
+
+def islandCount(state: Board, player: int) -> int:
+    blueScore = 0
+    redScore = 0
+
+    for (x,y) in state.occupied_hexes:
+        for pattern in _CAPTURE_PATTERNS:
+                coords = [_ADD((x,y), s) for s in pattern]
+                # No point checking if any coord is outside the board!
+                if all(map(state.inside_bounds, coords)):
+                    if state._data[x][y] == 1:
+                        if [x for x in coords].count(1) == 0:
+                             redScore += 1
+                    if state._data[x][y] == 2:
+                        if [x for x in coords].count(2) == 0:
+                            blueScore += 1        
+
+    if player == 1:
+        return redScore - blueScore
+
+    return blueScore - redScore
+
+    
+
