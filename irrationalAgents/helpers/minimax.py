@@ -1,11 +1,7 @@
-from time import process_time
 import time
-from numpy import Inf, Infinity
-import numpy as np
 from irrationalAgents.basicBoard import _SWAP_PLAYER, _TOKEN_MAP_OUT
 from irrationalAgents.helpers.pieces import islandCount, manhatten_distance, opponentEdge, pieceAdvantage, avgDistanceFromCentre, triangle_structures
 from irrationalAgents.helpers.evaluation import dijkstraEvalScore
-import copy
 
 
 def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer : int, ourPlayer: int, maxDepth: int) -> float:
@@ -157,13 +153,13 @@ def evaluate(state, player: int):
     # avgDistanceScore = -1 * avgDistanceFromCentre(state, player)
     # islandScore = islandCount(state, player)
     # triangeStructureScore = triangle_structures(state, player) / 3
+    # opponentEdgeScore = opponentEdge(state, player)
 
     # USED EVALs
     dijkstraScore = dijkstraEvalScore(player, state)
     pieceAdvantageScore = pieceAdvantage(state, player)
-    opponentEdgeScore = opponentEdge(state, player)
     
-    score = (2 * dijkstraScore + pieceAdvantageScore + opponentEdgeScore) 
+    score = (2 * dijkstraScore + pieceAdvantageScore) 
     
     return score
 
