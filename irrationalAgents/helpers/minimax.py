@@ -149,7 +149,7 @@ def evaluate(state, player: int):
     # if shortestPaths[0] > 2 or shortestPaths[1] > 2:
     #     dijkstraScore *= 10
     
-    score = (2 * dijkstraScore + pieceAdvantageScore + opponentEdgeScore) 
+    score = (2 * dijkstraScore + pieceAdvantageScore) 
     # score = dijkstraScore
 
     # print("EVAL! Action: " + str(action) + ". with respect to player " + str(player) + ". Score = " + str(np.arctan(score)/(np.pi/2)) + ".")

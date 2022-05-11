@@ -46,6 +46,7 @@ class Player:
             if numHexes > DEPTH1:
                 maxDepth = 1
 
+            print(f"Maxdepth = {maxDepth}")
 
             position = minimax(self.board, 0, None, -Infinity, +Infinity, self.player, self.player, maxDepth)
 
