@@ -10,8 +10,9 @@ import copy
 
 def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer : int, ourPlayer: int, maxDepth: int) -> float:
     # Print calls to help me figure out how it was working :)
-    # print("Depth = " + str(depth))
-    # print("Minimaxing move: Player " + str(curPlayer) + " " + str(action))
+    # if depth == 1:
+    #     print("Depth = " + str(depth))
+    #     print("Minimaxing move: Player " + str(curPlayer) + " " + str(action))
     # print("State:")
     # print_state(state._data)
     # print("Occupied hexes: " + str(state.occupied_hexes))
@@ -22,26 +23,27 @@ def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer 
     # Check if victory has been achieved. If so, we don't need to keep making moves on this state.
     victory = 0
     if state.turns_taken >= (2 * state.n - 1) and action is not None:
-        # print(f"Assessing victory for player {curPlayer}  wrt {ourPlayer}")
         victory = check_winner(state, action, curPlayer, ourPlayer)
         if victory == 1 or victory == -1:
-            return [action[1], action[2], Inf * victory]
+
+            return [action[1], action[2], 10000 * victory, depth]
 
     if ((state.greedyLimit - (state.totalTime + (time.process_time() - state.moveStart))) <= 0 ):
         maxDepth = 1
 
     # If we have hit max depth for minimax (and there's no victory), it's time to evaluate the board state.
     if depth >= maxDepth:
-        return [-1, -1, evaluate(state, ourPlayer)]
+        return [-1, -1, evaluate(state, ourPlayer), depth]
 
     # If we haven't hit max depth and victory hasn't been achieved, time to explore deeper.
     if curPlayer == ourPlayer:
         # Best outcome starts out at -inf w.r.t our player
-        best = [-1, -1, -Infinity]
+        best = [-1, -1, -10000, maxDepth]
         for hex in hexes_by_involvement(state):
             # place piece in hex, then run minimax on the resulting state
             x, y = hex[0], hex[1]
             action = ("PLACE", x, y)
+            # print(f"depth = {depth}, action = {action}")
             move = state.handle_action(action, _TOKEN_MAP_OUT[curPlayer])
             score = minimax(state, depth + 1, action, a, b, _SWAP_PLAYER[curPlayer], ourPlayer, maxDepth)
 
@@ -52,22 +54,28 @@ def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer 
             score[0], score[1] = x, y
             if score[2] > best[2]:
                 best = score
+            elif score[2] == best[2]:
+                # prefer shallower best moves
+                if score[3] < best[3]:
+                    best = score
 
             if ((state.randomLimit - (state.totalTime + (time.process_time() - state.moveStart))) <= 0 ):
                 return best
 
             # if our maximizing player hits a score that is greater than what the minimizing player will consider, break. This board state is now irrelevant and the rest of the possible moves are pruned.
             if best[2] >= (b):
+                #print(f"Pruned! Depth: {depth}")
                 break
             
             # update alpha so moves further down the minimax tree can use it as a reference
             a = max(a, best[2])
     else:
         # Best outcome starts at inf w.r.t our player
-        best = [-1, -1, Infinity]
+        best = [-1, -1, 10000, maxDepth]
         for hex in hexes_by_involvement(state):
             x, y = hex[0], hex[1]
             action = ("PLACE", x, y)
+            # print(f"depth = {depth}, action = {action}")
             move = state.handle_action(action, _TOKEN_MAP_OUT[curPlayer])
             score = minimax(state, depth + 1, action, a, b, _SWAP_PLAYER[curPlayer], ourPlayer, maxDepth)
             state.undo_move(move)
@@ -75,11 +83,16 @@ def minimax(state, depth : int, action : tuple, a : float, b : float, curPlayer 
             
             if score[2] < best[2]:
                 best = score
+            elif score[2] == best[2]:
+                # prefer shallower best moves
+                if score[3] < best[3]:
+                    best = score
 
             if ((state.randomLimit - (state.totalTime + (time.process_time() - state.moveStart))) <= 0 ):
                 return best
             
             if best[2] <= (a) :
+                #print(f"Pruned! Depth: {depth}")
                 break
             
             b = min(b, best[2])
@@ -149,7 +162,7 @@ def evaluate(state, player: int):
     # if shortestPaths[0] > 2 or shortestPaths[1] > 2:
     #     dijkstraScore *= 10
     
-    score = (2 * dijkstraScore + pieceAdvantageScore + opponentEdgeScore) 
+    score = (2 * dijkstraScore + pieceAdvantageScore) 
     # score = dijkstraScore
 
     # print("EVAL! Action: " + str(action) + ". with respect to player " + str(player) + ". Score = " + str(np.arctan(score)/(np.pi/2)) + ".")
@@ -171,6 +184,26 @@ def print_state(data):
         print(indent + str(row))
         indentDepth -= 1
     return
+
+def hexes_from_centroid(state):
+    
+    hexList = sorted(empty_hexes(state), key = lambda x: manhatten_distance(x, centroid(state)))
+    # print_state(state._data)
+    # print(hexList)
+    return hexList
+
+def centroid(state): 
+    numCoords = len(state.occupied_hexes)
+    if numCoords == 0:
+        return (0,0)
+    xsum = 0
+    ysum = 0
+    for coord in state.occupied_hexes:
+        xsum += coord[0]
+        ysum += coord[1]
+    
+    
+    return (xsum/numCoords, ysum/numCoords)
 
 
 
