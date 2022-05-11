@@ -153,25 +153,18 @@ def evaluate(state, player: int):
     Returns a value for the 'desirability' of a board state based upon an evaluation of certain features.
     '''
 
-    dijkstraScore = dijkstraEvalScore(player, state)
+    ## UNUSED EVALS
     # avgDistanceScore = -1 * avgDistanceFromCentre(state, player)
-    pieceAdvantageScore = pieceAdvantage(state, player)
-    opponentEdgeScore = opponentEdge(state, player)
-    islandScore = islandCount(state, player)
+    # islandScore = islandCount(state, player)
     # triangeStructureScore = triangle_structures(state, player) / 3
 
-    # if shortestPaths[0] > 2 or shortestPaths[1] > 2:
-    #     dijkstraScore *= 10
-    # score = islandScore
-    score = (2 * dijkstraScore + pieceAdvantageScore + opponentEdgeScore)
-    # score = dijkstraScore
-
-    # print("EVAL! Action: " + str(action) + ". with respect to player " + str(player) + ". Score = " + str(np.arctan(score)/(np.pi/2)) + ".")
-    # print(f"Dijkstra: {dijkstraScore}, Distance: {avgDistanceScore}, Piece Advantage: {pieceAdvantageScore}, Triangle Structure: {triangeStructureScore}")
-    # print("State:")
-    # print_state(state._data)
+    # USED EVALs
+    dijkstraScore = dijkstraEvalScore(player, state)
+    pieceAdvantageScore = pieceAdvantage(state, player)
+    opponentEdgeScore = opponentEdge(state, player)
     
-    # Normalise the score so that it lies in the range [-1, 1]. Note that the extremes are only possible in the case of victory or loss.
+    score = (2 * dijkstraScore + pieceAdvantageScore + opponentEdgeScore) 
+    
     return score
 
 def print_state(data):
