@@ -26,7 +26,6 @@ class Player:
         of the game, select an action to play.
         """
         self.board.moveStart = time.process_time()
-
         if ((self.board.randomLimit - (self.board.totalTime)) <= 0 ):
             position = hexes_by_involvement(self.board)[0]
         elif self.board.turns_taken == 0:
